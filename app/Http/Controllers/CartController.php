@@ -280,11 +280,31 @@ class CartController extends Controller
 
     public function placeOrder(Request $request)
     {
+        $customerPhone = $request->customerPhone;
+        // old orders
+        $old_orders = DB::table('orders')->whereIn('id', function ($query) use ($customerPhone) {
+            $query->select('order_id')->from('customers')
+                ->where('customerPhone', 'like', '%'.$customerPhone.'%')
+                ->orWhere('customerAddress', 'like', '%'.$customerPhone.'%');
+        })->get();
+        // user_ids = distinct user ids from old orders
+        $user_ids = $old_orders->unique('user_id')->pluck('user_id');
+        // is_repeat = if old orders are more than 0
+        $is_repeat = count($old_orders) > 0;
+        // is_fraud = if old orders has any cancelled order
+        $is_fraud = count($old_orders->where('status', 'Canceled')) > 0;
+        // ********** Canceled banan vul in their panel **********
 
         $user = DB::table('users')->where([
             ['status', 'like', 'Active'],
             ['role_id', '=', '3']
-        ])->inRandomOrder()->first();
+        ]);
+
+        if (count($user_ids) > 0) {
+            $user = $user->whereIn('id', $user_ids);
+        }
+        $user = $user->inRandomOrder();
+        $user = $user->first();
         if (!$user) {
             $user = User::find(1);
         }
@@ -298,6 +318,8 @@ class CartController extends Controller
         $order->orderDate = date('Y-m-d');
         $order->subTotal = Cart::subtotal('0','','')+$request->selectCourier;
         $order->user_id = $user->id;
+        $order->is_repeat = $is_repeat;
+        $order->is_fraud = $is_fraud;
         $order->save();
         if($order->id){
             $customer = new Customer();

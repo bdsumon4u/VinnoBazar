@@ -1219,17 +1219,17 @@ class OrderController extends Controller
         $orders = DB::table('orders')
             ->select('orders.*', 'customers.*')
             ->leftJoin('customers', 'orders.id', '=', 'customers.order_id')
-            // ->where('customers.order_id', '!=', $order_id)
-            // ->where(function ($query) use ($customer) {
-            //     $query->where('customers.customerPhone', 'like', $customer->customerPhone)
-            //         ->orWhere('customers.customerPhone', 'like', $customer->customerAddress)
-            //         ->orWhere('customers.customerAddress', 'like', $customer->customerPhone)
-            //         ->orWhere('customers.customerAddress', 'like', $customer->customerAddress);
-            // })->get();
-            ->where([
-                ['customers.order_id', '!=', $order_id],
-                ['customers.customerPhone', 'like', $customer->customerPhone]
-            ])->get();
+            ->where('customers.order_id', '!=', $order_id)
+            ->where(function ($query) use ($customer) {
+                $query->where('customers.customerPhone', 'like', $customer->customerPhone)
+                    ->orWhere('customers.customerPhone', 'like', $customer->customerAddress)
+                    ->orWhere('customers.customerAddress', 'like', $customer->customerPhone)
+                    ->orWhere('customers.customerAddress', 'like', $customer->customerAddress);
+            })->get();
+            // ->where([
+            //     ['customers.order_id', '!=', $order_id],
+            //     ['customers.customerPhone', 'like', $customer->customerPhone]
+            // ])->get();
         $order['data'] = $orders->map(function ($order) {
             $products = DB::table('order_products')->select('order_products.*')->where('order_id', '=', $order->id)->get();
             $orderProducts = '';
