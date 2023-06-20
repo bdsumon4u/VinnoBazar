@@ -37,16 +37,16 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                    <label for="customerAddress">Customer Phone</label>
-                                    <input type="text" class="form-control" id="customerAddress">
+                                    <label for="customerPhone">Customer Phone</label>
+                                    <input type="text" class="form-control" id="customerPhone">
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="customerPhone">Customer Address</label>
-                                    <textarea name="" class="form-control" placeholder="Customer Address" id="customerPhone" rows="2"></textarea>
+                                    <label for="customerAddress">Customer Address</label>
+                                    <textarea name="" class="form-control" placeholder="Customer Address" id="customerAddress" rows="2"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -271,6 +271,11 @@
                     customerAddress.css('border','1px solid red');
                     return;
                 }
+                if(customerAddress.val().length < 10 || customerAddress.val().length > 250){
+                    toastr.error('Address Must Be Between 10-250 Characters');
+                    customerAddress.css('border','1px solid red');
+                    return;
+                }
                 customerAddress.css('border','1px solid #ced4da');
 
                 if(orderDate.val() == ''){
@@ -286,6 +291,20 @@
                     return;
                 }
                 courierID.css('border','1px solid #ced4da');
+
+                if(courierID.val() == '34' && !cityID){
+                    toastr.error('City Should Not Be Empty');
+                    $('#cityID').closest('.form-group').find('.select2-selection').css('border','1px solid red');
+                    return;
+                }
+                $('#cityID').css('border','1px solid #ced4da');
+
+                if(courierID.val() == '34' && !zoneID){
+                    toastr.error('Zone Should Not Be Empty');
+                    $('#zoneID').closest('.form-group').find('.select2-selection').css('border','1px solid red');
+                    return;
+                }
+                $('#zoneID').css('border','1px solid #ced4da');
 
                 if(productCount == 0){
                     toastr.error('Product Should Not Be Empty');

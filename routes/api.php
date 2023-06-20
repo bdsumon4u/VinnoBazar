@@ -52,8 +52,10 @@ Route::post('status-update', function (Request $request)
         $orderProducts = OrderProducts::query()->where('order_id', '=', $order->id)->get();
         foreach ($orderProducts as $orderProduct) {
             $stock = Stock::query()->where('product_id', '=', $orderProduct->product_id)->first();
-            $stock->stock = $stock->stock - $orderProduct->quantity;
-            $stock->save();
+            if ($stock) {
+                $stock->stock = $stock->stock - $orderProduct->quantity;
+                $stock->save();
+            }
         }
     }
     if ($request->order_status_slug == 'Payment_Invoice') {
@@ -66,8 +68,10 @@ Route::post('status-update', function (Request $request)
         $orderProducts = OrderProducts::query()->where('order_id', '=', $order->id)->get();
         foreach ($orderProducts as $orderProduct) {
             $stock = Stock::query()->where('product_id', '=', $orderProduct->product_id)->first();
-            $stock->stock = $stock->stock + $orderProduct->quantity;
-            $stock->save();
+            if ($stock) {
+                $stock->stock = $stock->stock + $orderProduct->quantity;
+                $stock->save();
+            }
         }
     }
 

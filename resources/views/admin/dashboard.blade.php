@@ -227,6 +227,7 @@
                             $('#customerConfirm').text(data["customerConfirm"]);
                             $('#paid').text(data["paid"]);
                             $('#return').text(data["return"]);
+                            $('#returnReceived').text(data["returnReceived"]);
                             $('#lost').text(data["lost"]);
                             $('#pendingInvoiced').text(data["pendingInvoiced"]);
                             $('#invoiced').text(data["invoiced"]);

@@ -164,6 +164,10 @@
                                         class="btn btn-primary btn-add btn-xs waves-effect waves-light float-right"><i
                                         class="fas fa-plus mr-1"></i> Add New Order
                                 </a>
+                                <button type="button"
+                                        class="btn btn-warning btn-pathao btn-xs waves-effect waves-light mr-2 float-right"><i
+                                        class="fas fa-sync mr-1"></i> Pathao
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -407,6 +411,116 @@
             }
             // loadcountOrders();
             var token = $("input[name='_token']").val();
+
+            $(document).on('click', '.btn-pathao', function (e) {
+                e.preventDefault();
+
+                var rows_selected = table.column(0).checkboxes.selected();
+                var ids = [];
+                $.each(rows_selected, function (index, rowId) {
+                    ids[index] = rowId;
+                });
+                var user_id = $(this).attr('data-id');
+
+                jQuery.ajax({
+                    type: "get",
+                    url: "{{url('manager/order/pathao')}}",
+                    contentType: "application/json",
+                    data: {
+                        action: "pathao",
+                        ids: ids,
+                        user_id: user_id
+                    },
+                    success: function (response) {
+                        var data = JSON.parse(response);
+                        if (data["status"] == "success") {
+                            // Swal.fire(data["message"]);
+                            // table.ajax.reload();
+
+                            ivp(ids);
+                        } else {
+                            if (data["status"] == "failed") {
+                                Swal.fire(data["message"]);
+                            } else {
+                                Swal.fire("Something wrong ! Please try again.");
+                            }
+                        }
+                    },
+                    error: function (request, error) {
+                        toastr.error('Can not book in Pathao');
+                    }
+                });
+
+            });
+
+            function ivp(ids) {
+                if (ids.length < 1) {
+                    swal("Oops...!", "Select at last one", "error");
+                }
+
+                jQuery.ajax({
+                    type: "get",
+                    url: "{{url('manager/order/storeInvoice')}}",
+                    contentType: "application/json",
+                    data: {
+                        ids: ids
+                    },
+                    success: function (response) {
+                        var data = JSON.parse(response);
+                        if (data['status'] === 'success') {
+                            window.open(data['link'], "_blank");
+                            Swal.fire({
+                                title: "Pathao booked "+ids.length+" orders.",
+                                text: "All invoiced Printed?",
+                                type: "warning",
+                                showCancelButton: !0,
+                                confirmButtonColor: "#3085d6"
+                                , cancelButtonColor: "#d33"
+                                , confirmButtonText: "Yes, Invoiced Printed!"
+                            }).then((t) => {
+                                console.log(t.value);
+                                $.ajax({
+                                    type: "get",
+                                    url: "{{url('manager/order/changeStatusByCheckbox')}}",
+                                    data: {
+                                        'status': t.value ? 'Invoiced' : 'Pending Invoiced',
+                                        'ids': ids,
+                                        '_token': token
+                                    },
+                                    success: function (response) {
+                                        var data = JSON.parse(response);
+                                        if (data['status'] === 'success') {
+                                            toastr.success(data["message"]);
+                                        } else {
+                                            if (data['status'] === 'failed') {
+                                                toastr.error(data["message"]);
+                                            } else {
+                                                toastr.error('Something wrong ! Please try again.');
+                                            }
+                                        }
+                                        
+                                        // table.ajax.reload();
+                                        location.reload();
+                                    }
+                                });
+                            });
+
+                        } else {
+                            if (data['status'] === 'failed') {
+                                toastr.error(data["message"]);
+                            } else {
+                                toastr.error('Something wrong ! Please try again.');
+                            }
+                            
+                            // table.ajax.reload();
+                            location.reload();
+                        }
+
+                        $(document).find('.dt-checkboxes-select-all').click();
+                    }
+
+                });
+            }
 
             $(document).on('click', '.btn-all-delete', function (e) {
                 e.preventDefault();
@@ -1000,6 +1114,11 @@
                     customerAddress.css('border','1px solid red');
                     return;
                 }
+                if(customerAddress.val().length < 10 || customerAddress.val().length > 250){
+                    toastr.error('Address Must Be Between 10-250 Characters');
+                    customerAddress.css('border','1px solid red');
+                    return;
+                }
                 customerAddress.css('border','1px solid #ced4da');
 
                 if(orderDate.val() == ''){
@@ -1015,6 +1134,20 @@
                     return;
                 }
                 courierID.css('border','1px solid #ced4da');
+
+                if(courierID.val() == '34' && !cityID){
+                    toastr.error('City Should Not Be Empty');
+                    $('#cityID').closest('.form-group').find('.select2-selection').css('border','1px solid red');
+                    return;
+                }
+                $('#cityID').css('border','1px solid #ced4da');
+
+                if(courierID.val() == '34' && !zoneID){
+                    toastr.error('Zone Should Not Be Empty');
+                    $('#zoneID').closest('.form-group').find('.select2-selection').css('border','1px solid red');
+                    return;
+                }
+                $('#zoneID').css('border','1px solid #ced4da');
 
                 if(productCount == 0){
                     toastr.error('Product Should Not Be Empty');

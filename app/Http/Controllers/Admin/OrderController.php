@@ -46,6 +46,11 @@ class OrderController extends Controller
     // Order Store
     public function store(Request $request)
     {
+        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Phone no. must have 11 digits';
+            return json_encode($response);
+        }
         $order = new Order();
         $order->invoiceID = $this->uniqueID();
         $order->store_id = $request['data']['storeID'];
@@ -360,32 +365,37 @@ class OrderController extends Controller
     public function pathao(Request $request) {
         $response = ['status' => 'success', 'message' => 'Booked in Pathao'];
         foreach(Order::find($request->ids) as $order) {
+            if ($consignment_id = json_decode($order->courier, true)['consignment_id'] ?? null) {
+                $details =\App\Pathao\Facade\Pathao::order()->orderDetails($consignment_id);
+                if ($details->order_status != 'Pickup Cancel') continue;
+            }
+
             $customer = Customer::where('order_id', '=', $order->id)->first();
-            // if courier is pathao
-            if ($order->courier_id == 34) {
-                $phoneNumber = $customer->customerPhone;
-                $address = $customer->customerAddress;
-                if (! preg_match('/^(\+|0)[0-9\-]+$/', $phoneNumber)) {
-                    $phoneNumber = $customer->customerAddress;
-                    $address = $customer->customerPhone;
-                }
-                $data = [
-                    "store_id"            => "77565", // Find in store list,
-                    "merchant_order_id"   => $order->invoiceID, // Unique order id
-                    "recipient_name"      => $customer->customerName, // Customer name
-                    "recipient_phone"     => $phoneNumber, // Customer phone
-                    "recipient_address"   => $address, // Customer address
-                    "recipient_city"      => $order->city_id, // Find in city method
-                    "recipient_zone"      => $order->zone_id, // Find in zone method
-                    // "recipient_area"      => "", // Find in Area method
-                    "delivery_type"       => 48, // 48 for normal delivery or 12 for on demand delivery
-                    "item_type"           => 2, // 1 for document, 2 for parcel
-                    // "special_instruction" => "",
-                    "item_quantity"       => 1, // item quantity
-                    "item_weight"         => 0.5, // parcel weight
-                    "amount_to_collect"   => $order->subTotal, // - $order->deliveryCharge, // amount to collect
-                    // "item_description"    => "", // product details
-                ];
+            $order->courier_id = 34;
+            $phoneNumber = $customer->customerPhone;
+            $address = $customer->customerAddress;
+            if (! preg_match('/^01\d{9}$/', $phoneNumber)) {
+                $phoneNumber = $customer->customerAddress;
+                $address = $customer->customerPhone;
+            }
+            $data = [
+                "store_id"            => "77565", // Find in store list,
+                "merchant_order_id"   => $order->invoiceID, // Unique order id
+                "recipient_name"      => $customer->customerName, // Customer name
+                "recipient_phone"     => $phoneNumber, // Customer phone
+                "recipient_address"   => $address, // Customer address
+                "recipient_city"      => $order->city_id, // Find in city method
+                "recipient_zone"      => $order->zone_id, // Find in zone method
+                // "recipient_area"      => "", // Find in Area method
+                "delivery_type"       => 48, // 48 for normal delivery or 12 for on demand delivery
+                "item_type"           => 2, // 1 for document, 2 for parcel
+                // "special_instruction" => "",
+                "item_quantity"       => 1, // item quantity
+                "item_weight"         => 0.5, // parcel weight
+                "amount_to_collect"   => $order->subTotal, // - $order->deliveryCharge, // amount to collect
+                "item_description"    => $this->getProductsDetails($order->id), // product details
+            ];
+            try {
                 $data = \App\Pathao\Facade\Pathao::order()->create($data);
 
                 $courier = collect(json_decode(json_encode($data), true))->only([
@@ -397,8 +407,9 @@ class OrderController extends Controller
                     'collected_amount',
                 ])->all();
                 $order->forceFill(['courier' => ['booking' => 'Pathao'] + $courier])->save();
-            } else {
-                $response = ['status' => 'failed', 'message' => 'Some order has not been booked.'];
+            } catch (\Exception $e) {
+                $errors = collect($e->errors)->values()->flatten()->toArray();
+                $response = ['status' => 'failed', 'message' => $order->invoiceID.': '.($errors[0] ?? 'Unknown Error From Pathao')];
             }
         }
 
@@ -945,11 +956,6 @@ class OrderController extends Controller
         $order = Order::find($id);
 
         if ($request['status'] == 'Completed') {
-            if(! $order->city_id || ! $order->zone_id){
-                $response['status'] = 'failed';
-                $response['message'] = 'Please Select City and Zone';
-                return json_encode($response);
-            }
             $order->orderDate = date('Y-m-d');
         }
         if ($request['status'] == 'Delivered') {
@@ -1007,15 +1013,6 @@ class OrderController extends Controller
             foreach ($ids as $id) {
                 $order = Order::find($id);
                 $order->status = $status;
-
-                if ($status == 'Completed') {
-                    if (! $order->city_id || ! $order->zone_id) {
-                        $response['status'] = 'failed';
-                        $response['message'] = 'Please Select City and Zone';
-                        return json_encode($response);
-                    }
-                    $order->orderDate = date('Y-m-d');
-                }
 
                 if ($status == 'Delivered') {
                     $order->deliveryDate = date('Y-m-d');

@@ -947,6 +947,20 @@
                 }
                 courierID.css('border','1px solid #ced4da');
 
+                if(courierID.val() == '34' && !cityID){
+                    toastr.error('City Should Not Be Empty');
+                    $('#cityID').closest('.form-group').find('.select2-selection').css('border','1px solid red');
+                    return;
+                }
+                $('#cityID').css('border','1px solid #ced4da');
+
+                if(courierID.val() == '34' && !zoneID){
+                    toastr.error('Zone Should Not Be Empty');
+                    $('#zoneID').closest('.form-group').find('.select2-selection').css('border','1px solid red');
+                    return;
+                }
+                $('#zoneID').css('border','1px solid #ced4da');
+
                 if(productCount == 0){
                     toastr.error('Product Should Not Be Empty');
                     return;
@@ -1044,6 +1058,7 @@
                 $.each(rows_selected, function (index, rowId) {
                     ids[index] = rowId;
                 });
+                var user_id = $(this).attr('data-id');
 
                 jQuery.ajax({
                     type: "get",
@@ -1052,12 +1067,15 @@
                     data: {
                         action: "pathao",
                         ids: ids,
+                        user_id: user_id
                     },
                     success: function (response) {
                         var data = JSON.parse(response);
                         if (data["status"] == "success") {
-                            Swal.fire(data["message"]);
-                            table.ajax.reload();
+                            // Swal.fire(data["message"]);
+                            // table.ajax.reload();
+
+                            ivp(ids);
                         } else {
                             if (data["status"] == "failed") {
                                 Swal.fire(data["message"]);
@@ -1072,6 +1090,75 @@
                 });
 
             });
+
+            function ivp(ids) {
+                if (ids.length < 1) {
+                    swal("Oops...!", "Select at last one", "error");
+                }
+
+                jQuery.ajax({
+                    type: "get",
+                    url: "{{url('admin/order/storeInvoice')}}",
+                    contentType: "application/json",
+                    data: {
+                        ids: ids
+                    },
+                    success: function (response) {
+                        var data = JSON.parse(response);
+                        if (data['status'] === 'success') {
+                            window.open(data['link'], "_blank");
+                            Swal.fire({
+                                title: "Pathao booked "+ids.length+" orders.",
+                                text: "All invoiced Printed?",
+                                type: "warning",
+                                showCancelButton: !0,
+                                confirmButtonColor: "#3085d6"
+                                , cancelButtonColor: "#d33"
+                                , confirmButtonText: "Yes, Invoiced Printed!"
+                            }).then((t) => {
+                                console.log(t.value);
+                                $.ajax({
+                                    type: "get",
+                                    url: "{{url('admin/order/changeStatusByCheckbox')}}",
+                                    data: {
+                                        'status': t.value ? 'Invoiced' : 'Pending Invoiced',
+                                        'ids': ids,
+                                        '_token': token
+                                    },
+                                    success: function (response) {
+                                        var data = JSON.parse(response);
+                                        if (data['status'] === 'success') {
+                                            toastr.success(data["message"]);
+                                        } else {
+                                            if (data['status'] === 'failed') {
+                                                toastr.error(data["message"]);
+                                            } else {
+                                                toastr.error('Something wrong ! Please try again.');
+                                            }
+                                        }
+                                        
+                                        // table.ajax.reload();
+                                        location.reload();
+                                    }
+                                });
+                            });
+
+                        } else {
+                            if (data['status'] === 'failed') {
+                                toastr.error(data["message"]);
+                            } else {
+                                toastr.error('Something wrong ! Please try again.');
+                            }
+                            
+                            // table.ajax.reload();
+                            location.reload();
+                        }
+
+                        $(document).find('.dt-checkboxes-select-all').click();
+                    }
+
+                });
+            }
 
             $(document).on('click','.btn-print',function (e) {
                 e.preventDefault();

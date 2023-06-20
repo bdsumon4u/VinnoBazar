@@ -281,9 +281,14 @@ class CartController extends Controller
     public function placeOrder(Request $request)
     {
         $customerPhone = $request->customerPhone;
-        if (! preg_match('/^(01)[0-9]{9}$/', $customerPhone)) {
+        if (! preg_match('/^01\d{9}$/', $customerPhone)) {
             $response['status'] = 'failed';
             $response['message'] = 'Phone no. must have 11 digits';
+            return response()->json($response, 201);
+        }
+        if (strlen($request->customerAddress) < 10 || strlen($request->customerAddress) > 250) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Address must be between 10-250 characters';
             return response()->json($response, 201);
         }
         // old orders
@@ -330,8 +335,8 @@ class CartController extends Controller
             $customer = new Customer();
             $customer->order_id = $order->id;
             $customer->customerName = $request->customerName;
-            $customer->customerPhone = $request->customerAddress;
-            $customer->customerAddress = $request->customerPhone;
+            $customer->customerPhone = $request->customerPhone;
+            $customer->customerAddress = $request->customerAddress;
             $customer->save();
             foreach(Cart::content() as $item) {
 

@@ -32,16 +32,16 @@
                             <div class="row">
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="customerAddress">Customer Phone</label>
-                                    <input type="text" class="form-control" id="customerAddress" value="{{ $order->customerAddress }}">
+                                    <label for="customerPhone">Customer Phone</label>
+                                    <input type="text" class="form-control" id="customerPhone" value="{{ $order->customerPhone }}">
                                  </div>
                             </div>
                         </div>
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="customerPhone">Customer address</label>
+                                    <label for="customerAddress">Customer address</label>
                                     
-                                    <textarea name="" class="form-control" placeholder="Customer Phone" id="customerPhone" rows="2">{{ $order->customerPhone }}</textarea>
+                                    <textarea name="" class="form-control" placeholder="Customer Address" id="customerAddress" rows="2">{{ $order->customerAddress }}</textarea>
                                 </div>
                             </div>
                         </div>

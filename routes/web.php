@@ -284,6 +284,7 @@ Route::group(['as' => 'manager.', 'prefix' => 'manager', 'namespace' => 'Manager
     Route::get('order/courier', 'OrderController@courier')->name('courier');
     Route::get('order/city', 'OrderController@city')->name('city');
     Route::get('order/zone', 'OrderController@zone')->name('zone');
+    Route::get('order/pathao', 'OrderController@pathao')->name('pathao');
     Route::get('order/paymenttype', 'OrderController@paymenttype')->name('paymenttype');
     Route::get('order/paymentnumber', 'OrderController@paymentnumber')->name('paymentnumber');
 
@@ -380,6 +381,7 @@ Route::group(['as' => 'user.', 'prefix' => 'user', 'namespace' => 'User', 'middl
     Route::get('order/courier', 'OrderController@courier')->name('courier');
     Route::get('order/city', 'OrderController@city')->name('city');
     Route::get('order/zone', 'OrderController@zone')->name('zone');
+    Route::get('order/pathao', 'OrderController@pathao')->name('pathao');
     Route::get('order/paymenttype', 'OrderController@paymenttype')->name('paymenttype');
     Route::get('order/paymentnumber', 'OrderController@paymentnumber')->name('paymentnumber');
 

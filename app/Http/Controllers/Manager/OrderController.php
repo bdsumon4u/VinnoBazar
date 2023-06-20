@@ -46,6 +46,11 @@ class OrderController extends Controller
     // Order Store
     public function store(Request $request)
     {
+        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Phone no. must have 11 digits';
+            return json_encode($response);
+        }
         $order = new Order();
         $order->invoiceID = $this->uniqueID();
         $order->store_id = $request['data']['storeID'];
@@ -162,6 +167,15 @@ public function show(Request $request)
             $orders = $orders->Where('orders.user_id', '=',$columns[9]['search']['value']);
         }
         return DataTables::of($orders->latest('id'))
+            ->setRowClass(function ($row) {
+                if ($row->is_fraud ?? false) {
+                    return 'bg-danger';
+                }
+                if ($row->is_repeat ?? false) {
+                    return 'bg-warning';
+                }
+                return '';
+            })
             ->addColumn('customerInfo', function ($orders) {
                 return $orders->customerName . '<br>' . $orders->customerPhone . '<br>' . $orders->customerAddress;
             })
@@ -198,6 +212,13 @@ public function show(Request $request)
             })
             ->editColumn('courierName', function ($orders) {
                 if ($orders->courierName) {
+                    if ($orders->courier) {
+                        $return = '';
+                        foreach (json_decode($orders->courier, true) as $prop => $val) {
+                            $return .= '<div>'.$prop.': <strong>'.$val.'</strong></div>';
+                        }
+                        return $return;
+                    }
                     return $orders->courierName;
                 } else {
                     return 'Not Selected';
@@ -253,6 +274,11 @@ public function show(Request $request)
     // Update Order
     public function update(Request $request, $id)
     {
+        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Phone no. must have 11 digits';
+            return json_encode($response);
+        }
         $order = Order::find($id);
         $order->store_id = $request['data']['storeID'];
         $order->subTotal = $request['data']['total'];
@@ -298,37 +324,90 @@ public function show(Request $request)
             }
             $notification = new Notification();
             $notification->order_id = $order->id;
-            $notification->notificaton = Auth::user()->name .' Update Order Details';
-            $notification->user_id =  Auth::id();
+            $notification->notificaton = Auth::user()->name . ' Update Order Details';
+            $notification->user_id = Auth::id();
             $notification->save();
-                $paymentComplete = PaymentCompelte::where('order_id', $order->id)->first();
-                if($paymentComplete){
-                    $paymentComplete->payment_type_id = $request['data']['paymentTypeID'];
-                    $paymentComplete->payment_id = $request['data']['paymentID'];
-                    if($newAmount != $oldAmount){
-                        $paymentComplete->amount = $request['data']['paymentAmount'];
-                        $paymentComplete->date = date('Y-m-d');
-                    }
-                    $paymentComplete->trid = $request['data']['paymentAgentNumber'];
-                    $paymentComplete->userID = Auth::id();
-                    $paymentComplete->update();
-                }else{
-                    $paymentComplete = new PaymentCompelte();
-                    $paymentComplete->order_id = $order->id;
-                    $paymentComplete->payment_type_id = $request['data']['paymentTypeID'];
-                    $paymentComplete->payment_id = $request['data']['paymentID'];
+            $paymentComplete = PaymentCompelte::where('order_id', $order->id)->first();
+            if ($paymentComplete) {
+                $paymentComplete->payment_type_id = $request['data']['paymentTypeID'];
+                $paymentComplete->payment_id = $request['data']['paymentID'];
+                if ($newAmount != $oldAmount) {
                     $paymentComplete->amount = $request['data']['paymentAmount'];
-                    $paymentComplete->trid = $request['data']['paymentAgentNumber'];
                     $paymentComplete->date = date('Y-m-d');
-                    $paymentComplete->userID = Auth::id();
-                    $paymentComplete->save();
                 }
+                $paymentComplete->trid = $request['data']['paymentAgentNumber'];
+                $paymentComplete->userID = Auth::id();
+                $paymentComplete->update();
+            } else {
+                $paymentComplete = new PaymentCompelte();
+                $paymentComplete->order_id = $order->id;
+                $paymentComplete->payment_type_id = $request['data']['paymentTypeID'];
+                $paymentComplete->payment_id = $request['data']['paymentID'];
+                $paymentComplete->amount = $request['data']['paymentAmount'];
+                $paymentComplete->trid = $request['data']['paymentAgentNumber'];
+                $paymentComplete->date = date('Y-m-d');
+                $paymentComplete->userID = Auth::id();
+                $paymentComplete->save();
+            }
             $response['status'] = 'success';
             $response['message'] = 'Successfully Update Order';
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Update Order';
         }
+        return json_encode($response);
+    }
+
+    public function pathao(Request $request) {
+        $response = ['status' => 'success', 'message' => 'Booked in Pathao'];
+        foreach(Order::find($request->ids) as $order) {
+            if ($consignment_id = json_decode($order->courier, true)['consignment_id'] ?? null) {
+                $details =\App\Pathao\Facade\Pathao::order()->orderDetails($consignment_id);
+                if ($details->order_status != 'Pickup Cancel') continue;
+            }
+            $customer = Customer::where('order_id', '=', $order->id)->first();
+            $order->courier_id = 34;
+            $phoneNumber = $customer->customerPhone;
+            $address = $customer->customerAddress;
+            if (! preg_match('/^01\d{9}$/', $phoneNumber)) {
+                $phoneNumber = $customer->customerAddress;
+                $address = $customer->customerPhone;
+            }
+            $data = [
+                "store_id"            => "77565", // Find in store list,
+                "merchant_order_id"   => $order->invoiceID, // Unique order id
+                "recipient_name"      => $customer->customerName, // Customer name
+                "recipient_phone"     => $phoneNumber, // Customer phone
+                "recipient_address"   => $address, // Customer address
+                "recipient_city"      => $order->city_id, // Find in city method
+                "recipient_zone"      => $order->zone_id, // Find in zone method
+                // "recipient_area"      => "", // Find in Area method
+                "delivery_type"       => 48, // 48 for normal delivery or 12 for on demand delivery
+                "item_type"           => 2, // 1 for document, 2 for parcel
+                // "special_instruction" => "",
+                "item_quantity"       => 1, // item quantity
+                "item_weight"         => 0.5, // parcel weight
+                "amount_to_collect"   => $order->subTotal, // - $order->deliveryCharge, // amount to collect
+                "item_description"    => $this->getProductsDetails($order->id), // product details
+            ];
+            try {
+                $data = \App\Pathao\Facade\Pathao::order()->create($data);
+
+                $courier = collect(json_decode(json_encode($data), true))->only([
+                    'consignment_id',
+                    'order_status',
+                    'reason',
+                    'invoice_id',
+                    'payment_status',
+                    'collected_amount',
+                ])->all();
+                $order->forceFill(['courier' => ['booking' => 'Pathao'] + $courier])->save();
+            } catch (\Exception $e) {
+                $errors = collect($e->errors)->values()->flatten()->toArray();
+                $response = ['status' => 'failed', 'message' => $order->invoiceID.': '.($errors[0] ?? 'Unknown Error From Pathao')];
+            }
+        }
+
         return json_encode($response);
     }
 
@@ -638,7 +717,11 @@ public function show(Request $request)
                 "Lost" => array(
                     "name" => "Lost",
                     "color" => "bg-danger"
-                )
+                ),
+                "Return Received" => array(
+                    "name" => "Return Received",
+                    "color" => "bg-danger"
+                ),
             )
         );
 
@@ -1144,10 +1227,17 @@ public function show(Request $request)
         $orders  = DB::table('orders')
             ->select('orders.*', 'customers.*')
             ->leftJoin('customers', 'orders.id', '=', 'customers.order_id')
-            ->where([
-                ['customers.order_id','!=',$order_id],
-                ['customers.customerPhone','like',$customer->customerPhone]
-            ])->get();
+            ->where('customers.order_id', '!=', $order_id)
+            ->where(function ($query) use ($customer) {
+                $query->where('customers.customerPhone', 'like', $customer->customerPhone)
+                    ->orWhere('customers.customerPhone', 'like', $customer->customerAddress)
+                    ->orWhere('customers.customerAddress', 'like', $customer->customerPhone)
+                    ->orWhere('customers.customerAddress', 'like', $customer->customerAddress);
+            })->get();
+            // ->where([
+            //     ['customers.order_id', '!=', $order_id],
+            //     ['customers.customerPhone', 'like', $customer->customerPhone]
+            // ])->get();
         $order['data'] = $orders->map(function ($order) {
             $products = DB::table('order_products')->select('order_products.*')->where('order_id', '=', $order->id)->get();
             $orderProducts = '';
@@ -1180,6 +1270,7 @@ public function show(Request $request)
         $response['requestToReturn'] = DB::table('orders')->where('status', 'like', 'Request to Return')->count();
         $response['paid'] = DB::table('orders')->where('status', 'like', 'Paid')->count();
         $response['return'] = DB::table('orders')->where('status', 'like', 'Return')->count();
+        $response['returnReceived'] = DB::table('orders')->where('status', 'like', 'Return Received')->count();
         $response['lost'] = DB::table('orders')->where('status', 'like', 'Lost')->count();
         $response['status'] = 'success';
         return json_encode($response);

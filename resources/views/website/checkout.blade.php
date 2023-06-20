@@ -200,12 +200,12 @@
                         },
                         success: function (data) {
                             if(data['status'] === 'success'){
-                                showFrontendAlert('success', 'Successfully Place order');
+                                showFrontendAlert('success', data['message']);
                                 window.location.href = data['link'];
-
+                            }else if(data['status'] === 'failed'){
+                                showFrontendAlert('error', data['message']);
                             }else{
                                 showFrontendAlert('error', 'Unsuccessful to Place order');
-
                             }
                         }
                     });

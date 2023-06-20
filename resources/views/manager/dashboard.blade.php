@@ -152,6 +152,10 @@
                                 <td><h5 class="font-15 my-1 font-weight-normal">Lost</h5></td>
                                 <td><span id="list">0</span></td>
                             </tr>
+                            <tr>
+                                <td><h5 class="font-15 my-1 font-weight-normal">Return Received</h5></td>
+                                <td><span id="returnReceived">0</span></td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -224,6 +228,7 @@
                             $('#customerConfirm').text(data["customerConfirm"]);
                             $('#paid').text(data["paid"]);
                             $('#return').text(data["return"]);
+                            $('#returnReceived').text(data["returnReceived"]);
                             $('#lost').text(data["lost"]);
                             $('#pendingInvoiced').text(data["pendingInvoiced"]);
                             $('#invoiced').text(data["invoiced"]);
