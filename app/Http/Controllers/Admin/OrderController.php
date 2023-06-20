@@ -273,6 +273,11 @@ class OrderController extends Controller
     // Update Order
     public function update(Request $request, $id)
     {
+        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Phone no. must have 11 digits';
+            return json_encode($response);
+        }
         $order = Order::find($id);
         $order->store_id = $request['data']['storeID'];
         $order->subTotal = $request['data']['total'];

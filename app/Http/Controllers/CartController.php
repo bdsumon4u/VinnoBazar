@@ -281,6 +281,11 @@ class CartController extends Controller
     public function placeOrder(Request $request)
     {
         $customerPhone = $request->customerPhone;
+        if (! preg_match('/^(01)[0-9]{9}$/', $customerPhone)) {
+            $response['status'] = 'failed';
+            $response['message'] = 'Phone no. must have 11 digits';
+            return response()->json($response, 201);
+        }
         // old orders
         $old_orders = DB::table('orders')->whereIn('id', function ($query) use ($customerPhone) {
             $query->select('order_id')->from('customers')
