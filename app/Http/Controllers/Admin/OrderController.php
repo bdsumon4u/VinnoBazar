@@ -945,6 +945,11 @@ class OrderController extends Controller
         $order = Order::find($id);
 
         if ($request['status'] == 'Completed') {
+            if(! $order->city_id || ! $order->zone_id){
+                $response['status'] = 'failed';
+                $response['message'] = 'Please Select City and Zone';
+                return json_encode($response);
+            }
             $order->orderDate = date('Y-m-d');
         }
         if ($request['status'] == 'Delivered') {
@@ -1003,6 +1008,14 @@ class OrderController extends Controller
                 $order = Order::find($id);
                 $order->status = $status;
 
+                if ($status == 'Completed') {
+                    if (! $order->city_id || ! $order->zone_id) {
+                        $response['status'] = 'failed';
+                        $response['message'] = 'Please Select City and Zone';
+                        return json_encode($response);
+                    }
+                    $order->orderDate = date('Y-m-d');
+                }
 
                 if ($status == 'Delivered') {
                     $order->deliveryDate = date('Y-m-d');
