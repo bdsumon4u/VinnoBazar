@@ -148,8 +148,7 @@ class OrderController extends Controller
                 ->orWhere('orders.web_ID', 'like', "%{$columns[1]['search']['value']}%");
         }
         if ($columns[2]['search']['value']) {
-            $orders = $orders->Where('customers.customerPhone', 'like', "%{$columns[2]['search']['value']}%")
-                ->orWhere('customers.customerAddress', 'like', "%{$columns[2]['search']['value']}%");
+            $orders = $orders->Where('customers.customerPhone', 'like', "%{$columns[2]['search']['value']}%");
         }
         if ($columns[5]['search']['value']) {
             $orders = $orders->Where('orders.courier_id', '=',$columns[5]['search']['value']);
@@ -1232,14 +1231,11 @@ class OrderController extends Controller
         $order_id = $request['id'];
         $customer = Customer::query()->where('order_id', '=', $order_id)->get()->first();
         $orders = DB::table('orders')
-            ->select('orders.*', 'customers.*')
+            ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress')
             ->leftJoin('customers', 'orders.id', '=', 'customers.order_id')
             ->where('customers.order_id', '!=', $order_id)
             ->where(function ($query) use ($customer) {
-                $query->where('customers.customerPhone', 'like', $customer->customerPhone)
-                    ->orWhere('customers.customerPhone', 'like', $customer->customerAddress)
-                    ->orWhere('customers.customerAddress', 'like', $customer->customerPhone)
-                    ->orWhere('customers.customerAddress', 'like', $customer->customerAddress);
+                $query->where('customers.customerPhone', 'like', $customer->customerPhone);
             })->get();
             // ->where([
             //     ['customers.order_id', '!=', $order_id],

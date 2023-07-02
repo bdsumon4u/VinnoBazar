@@ -1189,14 +1189,11 @@ class OrderController extends Controller
         $order_id = $request['id'];
         $customer = Customer::query()->where('order_id','=',$order_id)->get()->first();
         $orders  = DB::table('orders')
-            ->select('orders.*', 'customers.*')
+            ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress')
             ->leftJoin('customers', 'orders.id', '=', 'customers.order_id')
             ->where('customers.order_id', '!=', $order_id)
             ->where(function ($query) use ($customer) {
-                $query->where('customers.customerPhone', 'like', $customer->customerPhone)
-                    ->orWhere('customers.customerPhone', 'like', $customer->customerAddress)
-                    ->orWhere('customers.customerAddress', 'like', $customer->customerPhone)
-                    ->orWhere('customers.customerAddress', 'like', $customer->customerAddress);
+                $query->where('customers.customerPhone', 'like', $customer->customerPhone);
             })->get();
             // ->where([
             //     ['customers.order_id', '!=', $order_id],
