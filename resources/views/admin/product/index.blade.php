@@ -21,7 +21,7 @@
             </div>
         </div>
     </div>
-    <div id="modal" class="modal fade bs-example-modal-lg" aria-hidden="true">
+    <div id="modal" class="modal fade bs-example-modal-lg" aria-hidden="true" style="overflow-y: auto;">
         <div class="modal-dialog modal-full">
             <div class="modal-content">
                 <div class="modal-header">

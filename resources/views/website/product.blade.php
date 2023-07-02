@@ -20,6 +20,11 @@
 								<li data-target="#single-product-galary" data-slide-to="0" class="active">
 									<img class="img-thumbnail" alt="" src="{{ url('/public/product/thumbnail/'.$product->productImage)  }}">
 								</li>
+								@foreach($product->media as $media)
+									<li data-target="#single-product-galary" data-slide-to="{{ $loop->index+1 }}">
+										<img class="img-thumbnail" alt="" src="{{ url('/public/product/thumbnail/'.$media->url)  }}">
+									</li>
+								@endforeach
 							</ol>
 						</div>
 					</div>
