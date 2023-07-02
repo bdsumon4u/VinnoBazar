@@ -103,7 +103,7 @@
                 processing: true,
                 serverSide: true,
                 search:false,
-                pageLength: 50,
+                pageLength: 10,
                 columnDefs: [
                     {
                         targets: 0,

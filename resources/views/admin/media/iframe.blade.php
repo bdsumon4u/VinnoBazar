@@ -67,7 +67,7 @@
 
         var table = $("#table").DataTable({
             ajax: "{{ url('admin/media/iframeget?multiple=') }}{{ $multiple }}",
-            pageLength: 50,
+            pageLength: 10,
             ordering: false,
             columnDefs: [
                 {

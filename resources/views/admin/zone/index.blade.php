@@ -79,7 +79,7 @@
         $(document).ready(function(){
             var table = $("#storeTable").DataTable({
                 ajax: "{{url('admin/zone/show')}}",
-                "pageLength": 50,
+                "pageLength": 10,
                 ordering: false,
                 columns: [
                     {data: "id"},

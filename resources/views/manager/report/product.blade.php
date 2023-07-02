@@ -92,7 +92,7 @@
                     }
                 },
                 ordering: false,
-                pageLength: 50,
+                pageLength: 10,
                 columns: [
                     {data: "product_id"},
                     {

@@ -93,7 +93,7 @@
             $(".datepicker").flatpickr();
             var table = $("#storeTable").DataTable({
                 ajax: "{{url('admin/purchase/show')}}",
-                "pageLength": 50,
+                "pageLength": 10,
                 ordering: false,
                 columns: [
                     {data: "id"},

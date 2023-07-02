@@ -198,7 +198,7 @@
                 ordering: false,
                 processing: true,
                 serverSide: true,
-                pageLength: 50,
+                pageLength: 10,
                 search:false,
                 rowId: 'id',
                 select: true,

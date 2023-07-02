@@ -70,7 +70,7 @@
             $(".datepicker").flatpickr();
             var table = $("#storeTable").DataTable({
                 ajax: "{{url('manager/payment/type/show')}}",
-                "pageLength": 50,
+                "pageLength": 10,
                 ordering: false,
                 columns: [
                     {data: "id"},

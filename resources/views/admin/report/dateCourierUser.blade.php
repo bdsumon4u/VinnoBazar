@@ -104,7 +104,7 @@
                     }
                 },
                 ordering: false,
-                pageLength: 50,
+                pageLength: 10,
                 paging: true,
                 columns: [
                     {data: "invoiceID"},

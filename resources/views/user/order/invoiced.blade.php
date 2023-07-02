@@ -150,7 +150,7 @@
                 ordering: false,
                 processing: true,
                 serverSide: true,
-                pageLength: 50,
+                pageLength: 10,
                 rowId: "id",
                 columnDefs: [
                     {

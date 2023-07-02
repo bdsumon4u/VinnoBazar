@@ -44,7 +44,7 @@
          $(document).ready(function(){
              var table = $("#stockTable").DataTable({
                  ajax: "{{url('admin/stock/show')}}",
-                 "pageLength": 50,
+                 "pageLength": 10,
                  ordering: false,
                  columns: [
                      {data: "id"},
