@@ -46,11 +46,24 @@ class OrderController extends Controller
     // Order Store
     public function store(Request $request)
     {
-        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+        if (! preg_match('/^(01)[0-9]{9}$/',$customerPhone = $request['data']['customerPhone'])) {
             $response['status'] = 'failed';
             $response['message'] = 'Phone no. must have 11 digits';
             return json_encode($response);
         }
+
+        // old orders
+        $old_orders = DB::table('orders')->whereIn('id', function ($query) use ($customerPhone) {
+            $query->select('order_id')->from('customers')
+                ->where('customerPhone', 'like', '%'.$customerPhone.'%');
+        })->orderByDesc('id')->get();
+
+        // is_repeat = if old orders are more than 0
+        $is_repeat = count($old_orders) > 0;
+        // is_fraud = if old orders has any cancelled order
+        $is_fraud = count($old_orders->where('status', 'Canceled')) > 0;
+        // ********** Canceled banan vul in their panel **********
+
         $order = new Order();
         $order->invoiceID = $this->uniqueID();
         $order->store_id = $request['data']['storeID'];
@@ -67,6 +80,8 @@ class OrderController extends Controller
         $order->zone_id = $request['data']['zoneID'];
         $products = $request['data']['products'];
         $order->user_id = Auth::id();
+        $order->is_repeat = $is_repeat;
+        $order->is_fraud = $is_fraud;
         $result = $order->save();
         if ($result) {
             $customer = new Customer();
