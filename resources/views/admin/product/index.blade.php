@@ -150,6 +150,8 @@
             var token = $("input[name='_token']").val();
             var table = $("#table").DataTable({
                 ajax: "{{ url('admin/product/show') }}",
+                processing: true,
+                serverSide: true,
                 pageLength: 10,
                 ordering: false,
                 columnDefs: [
