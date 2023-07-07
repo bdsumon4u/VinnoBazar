@@ -138,10 +138,8 @@ public function show(Request $request)
         $orders = DB::table('orders')
             ->leftjoin('customers', 'orders.id', '=', 'customers.order_id')
             ->leftjoin('users', 'orders.user_id', '=', 'users.id')
-            ->leftjoin('cities', 'orders.city_id', '=', 'cities.id')
-            ->leftjoin('zones', 'orders.zone_id', '=', 'zones.id')
             ->leftjoin('couriers', 'orders.courier_id', '=', 'couriers.id')
-            ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress', 'couriers.courierName', 'cities.cityName', 'zones.zoneName', 'users.name');
+            ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress', 'couriers.courierName', 'users.name');
 
         if ($status == 'Pending Invoiced') {
             $orders = $orders->whereIn('orders.status', ['Completed', 'Pending Invoiced']);

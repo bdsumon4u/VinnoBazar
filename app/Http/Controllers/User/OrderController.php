@@ -140,10 +140,8 @@ class OrderController extends Controller
         $orders  = DB::table('orders')
             ->leftjoin('customers', 'orders.id', '=', 'customers.order_id')
             ->leftjoin('users', 'orders.user_id', '=', 'users.id')
-            ->leftjoin('cities', 'orders.city_id', '=', 'cities.id')
-            ->leftjoin('zones', 'orders.zone_id', '=', 'zones.id')
             ->leftjoin('couriers', 'orders.courier_id', '=', 'couriers.id')
-            ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress', 'couriers.courierName', 'cities.cityName', 'zones.zoneName', 'users.name')->orderBy('orders.id', 'desc');
+            ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress', 'couriers.courierName', 'users.name')->orderBy('orders.id', 'desc');
 
         if($status != 'All') {
             $orders = $orders->where('orders.user_id', '=', Auth::id());
