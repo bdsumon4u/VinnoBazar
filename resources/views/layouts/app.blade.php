@@ -106,7 +106,7 @@
 
     <script src="{{asset('js/media.js')}}"></script>
     <script>
-        @if(Auth::user()->role_id == 1)
+        @if(false && Auth::user()->role_id == 1)
         setInterval(function(){
             $.ajax({
                 type : "get",
@@ -122,7 +122,7 @@
             });
         },3000);
         @endif
-        @if(Auth::user()->role_id == 2)
+        @if(false && Auth::user()->role_id == 2)
         setInterval(function(){
             $.ajax({
                 type : "get",
