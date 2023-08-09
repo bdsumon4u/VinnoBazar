@@ -10,7 +10,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="text-md-right">
-                                <button type="button" class="btn btn-blue btn-add btn-xs waves-effect waves-light float-right"><i class="fas fa-plus"></i> Add New Product</button>
+                                <button type="button"
+                                    class="btn btn-blue btn-add btn-xs waves-effect waves-light float-right"><i
+                                        class="fas fa-plus"></i> Add New Product</button>
                             </div>
                         </div>
                     </div>
@@ -35,7 +37,7 @@
 
                             <div class="form-group mb-3">
                                 <label for="productName">Product Name <span class="text-danger">*</span></label>
-                                <input type="text" id="productName" class="form-control" >
+                                <input type="text" id="productName" class="form-control">
                             </div>
                             <div class="form-group mb-3">
                                 <label for="productSlug">Product Slug <span class="text-danger">*</span></label>
@@ -52,7 +54,8 @@
 
                             <div class="form-group mb-3">
                                 <label for="productCategory">Categories <span class="text-danger">*</span></label>
-                                <select class="form-control" id="productCategory" data-toggle="select2" multiple="multiple" data-placeholder="Choose ...">
+                                <select class="form-control" id="productCategory" data-toggle="select2" multiple="multiple"
+                                    data-placeholder="Choose ...">
                                     <option>Select</option>
                                 </select>
                             </div>
@@ -60,7 +63,7 @@
 
                             <div class="form-group mb-3">
                                 <label for="productDetails">Product Description <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="productDetails" rows="5" ></textarea>
+                                <textarea class="form-control" id="productDetails" rows="5"></textarea>
                             </div>
                         </div>
 
@@ -72,7 +75,8 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-group mb-3">
-                                        <label for="productRegularPrice">Regular Price <span class="text-danger">*</span></label>
+                                        <label for="productRegularPrice">Regular Price <span
+                                                class="text-danger">*</span></label>
                                         <input type="number" id="productRegularPrice" class="form-control">
                                     </div>
                                 </div>
@@ -88,7 +92,8 @@
                                 <div class="col-3">
                                     <div class="form-group mb-3">
                                         <label for="productDetails">Feature Image <span class="text-danger">*</span></label>
-                                        <button type="button" class="image-picker btn btn-success d-block mb-2" data-input-name="files[additional_images][]">
+                                        <button type="button" class="image-picker btn btn-success d-block mb-2"
+                                            data-input-name="files[additional_images][]">
                                             <i class="mdi mdi-cloud-upload"></i> Browse
                                         </button>
                                         <div class="single-image image-holder-wrapper clearfix">
@@ -100,8 +105,10 @@
                                 </div>
                                 <div class="col-9">
                                     <div class="form-group mb-3">
-                                        <label for="productDetails">Gallery Image <span class="text-danger">*</span></label>
-                                        <button type="button" class="image-picker btn btn-success d-block" data-input-name="files[additional_images][]" data-multiple="">
+                                        <label for="productDetails">Gallery Image <span
+                                                class="text-danger">*</span></label>
+                                        <button type="button" class="image-picker btn btn-success d-block"
+                                            data-input-name="files[additional_images][]" data-multiple="">
                                             <i class="mdi mdi-cloud-upload"></i> Browse
                                         </button>
                                         <div class="image-list image-holder-wrapper clearfix">
@@ -122,7 +129,8 @@
 
                                 <div class="form-group mb-3">
                                     <label for="MetaKeywords">Meta Keywords</label>
-                                    <input type="text" class="form-control" id="MetaKeywords" placeholder="Enter keywords">
+                                    <input type="text" class="form-control" id="MetaKeywords"
+                                        placeholder="Enter keywords">
                                 </div>
 
                                 <div class="form-group mb-0">
@@ -145,8 +153,13 @@
 @endsection
 @push('js')
     <script>
-        $(document).ready(function(){
-            $("#productDetails").summernote({height:180,minHeight:null,maxHeight:null,focus:!1});
+        $(document).ready(function() {
+            $("#productDetails").summernote({
+                height: 180,
+                minHeight: null,
+                maxHeight: null,
+                focus: !1
+            });
             var token = $("input[name='_token']").val();
             var table = $("#table").DataTable({
                 ajax: "{{ url('admin/product/show') }}",
@@ -154,39 +167,65 @@
                 serverSide: true,
                 pageLength: 10,
                 ordering: false,
-                columnDefs: [
-                    {
-                        targets: 0,
-                        checkboxes: {
-                            selectRow: true
-                        }
+                columnDefs: [{
+                    targets: 0,
+                    checkboxes: {
+                        selectRow: true
+                    }
+                }, ],
+                columns: [{
+                        data: "id",
+                        title: ""
                     },
-                ],
-                columns: [
-                    {data: "id",title:""},
-                    {data: "productImage",title:"Image"},
-                    {data: "productName",title:"Product Name"},
-                    {data: "categories",title:"Categories Name"},
-                    {data: "productCode",title:"SKU"},
-                    {data: "productRegularPrice",title:"Price"},
-                    {data: "productSalePrice",title:"Sale Price"},
-                    {data: "status",title:"Status"},
-                    {data: "action",title:"Action"}
+                    {
+                        data: "productImage",
+                        title: "Image"
+                    },
+                    {
+                        data: "productName",
+                        title: "Product Name"
+                    },
+                    {
+                        data: "categories",
+                        title: "Categories Name"
+                    },
+                    {
+                        data: "productCode",
+                        title: "SKU"
+                    },
+                    {
+                        data: "productRegularPrice",
+                        title: "Price"
+                    },
+                    {
+                        data: "productSalePrice",
+                        title: "Sale Price"
+                    },
+                    {
+                        data: "status",
+                        title: "Status"
+                    },
+                    {
+                        data: "action",
+                        title: "Action"
+                    }
                 ],
 
-                drawCallback:function(){
+                drawCallback: function() {
                     $(".dataTables_paginate > .pagination").addClass("pagination-sm")
                 },
                 initComplete: function(settings, json) {
-                    $('#table_length').append('<button type="button" class="btn btn-danger waves-effect btn-sm waves-light mx-2">Danger</button>');
+                    $('#table_length').append(
+                        '<button type="button" class="btn btn-danger waves-effect btn-sm waves-light mx-2">Danger</button>'
+                        );
                 },
-                footerCallback : function ( row, data, start, end, display ) {
+                footerCallback: function(row, data, start, end, display) {
                     var api = this.api();
-                    var numRows = api.rows( ).count();
+                    var numRows = api.rows().count();
                     $('.total').empty().append(numRows);
                 }
             });
-            $(document).on("click", ".btn-add", function () {
+            $(document).on("click", ".btn-add", function() {
                 var modal = $('#modal');
                 modal.find('.modal-title').text('Add New Product');
                 modal.find('.modal-footer .btn-primary').text('Save');
@@ -196,14 +235,14 @@
 
             $("#productCategory").select2({
                 placeholder: "Select a Category",
-                multiple:true,
+                multiple: true,
                 ajax: {
                     type: "post",
-                    url:'{{url('admin/product/category')}}',
+                    url: '{{ url('admin/product/category') }}',
                     data: {
                         '_token': token
                     },
-                    processResults: function (data) {
+                    processResults: function(data) {
                         return {
                             results: $.parseJSON(data)
                         };
@@ -211,15 +250,15 @@
                 }
             });
 
-            $(document).on("click", ".btn-edit", function () {
+            $(document).on("click", ".btn-edit", function() {
                 var id = $(this).attr('data-id');
                 $.ajax({
-                    url: "{{url('admin/product/')}}/" + id + "/edit",
+                    url: "{{ url('admin/product/') }}/" + id + "/edit",
                     headers: {
                         'X-CSRF-TOKEN': token
                     },
                     contentType: 'application/json',
-                    success: function (response) {
+                    success: function(response) {
                         var data = JSON.parse(response);
                         $('#productID').val(id);
                         $('#productName').val(data['productName']);
@@ -227,26 +266,31 @@
                         $('#productCode').val(data['productCode']);
                         $("#productDetails").summernote("code", data['productDetails']);
                         $("#productCategory").empty();
-                        $.each( data['categories'], function( key, value ) {
-                            $("#productCategory").append('<option value="'+value.id+'" selected>'+value.categoryName+'</option>');
+                        $.each(data['categories'], function(key, value) {
+                            $("#productCategory").append('<option value="' + value.id +
+                                '" selected>' + value.categoryName + '</option>');
                         });
                         $("#productCategory").select2({
                             placeholder: "Select a Category",
-                            multiple:true,
+                            multiple: true,
                             ajax: {
                                 type: "post",
-                                url:'{{url('admin/product/category')}}',
+                                url: '{{ url('admin/product/category') }}',
                                 data: {
                                     '_token': token
                                 },
-                                processResults: function (data) {
+                                processResults: function(data) {
                                     return {
                                         results: $.parseJSON(data)
                                     };
                                 }
                             }
                         });
-                        var html = ('<div class="image-holder image-"><img src="{{ asset('/public/product/thumbnail/') }}/' +data['productImage']+ '"><button type="button" class="btn btn-danger btn-xs waves-effect waves-light remove-image float-right"><i class="mdi mdi-close"></i></button><input type="hidden" name="imageID" value="' + data['productImage'] + '"></div>');
+                        var html = (
+                            '<div class="image-holder image-"><img src="{{ asset('/product/thumbnail/') }}/' +
+                            data['productImage'] +
+                            '"><button type="button" class="btn btn-danger btn-xs waves-effect waves-light remove-image float-right"><i class="mdi mdi-close"></i></button><input type="hidden" name="imageID" value="' +
+                            data['productImage'] + '"></div>');
                         $('.single-image').find(".image-holder.placeholder").remove();
                         $('.single-image').empty().append(html);
 
@@ -264,7 +308,7 @@
             });
 
             // Save and update data
-            $(document).on("click", "#submit", function () {
+            $(document).on("click", "#submit", function() {
 
                 var type = $(this).val();
                 var productName = $('#productName');
@@ -279,7 +323,7 @@
                 var MetaDescription = $('#MetaDescription');
                 var imageID = $('input[name="imageID"]');
                 var gallery = [];
-                $('input[name="imageID[]"]').each(function(){
+                $('input[name="imageID[]"]').each(function() {
                     gallery.push($(this).val());
                 });
                 var productID = $('#productID').val();
@@ -328,7 +372,7 @@
                 if (type === 'Save') {
                     $.ajax({
                         type: "post",
-                        url: "{{url('admin/product')}}",
+                        url: "{{ url('admin/product') }}",
                         data: {
                             'productName': productName.val(),
                             'productSlug': productSlug.val(),
@@ -344,7 +388,7 @@
                             'gallery': gallery,
                             '_token': token
                         },
-                        success: function (data) {
+                        success: function(data) {
                             if (data['status'] === 'success') {
                                 toastr.success(data["message"]);
                                 $('.modal').modal('hide');
@@ -371,7 +415,7 @@
 
                     $.ajax({
                         type: "PUT",
-                        url: "{{url('admin/product')}}/" + productID,
+                        url: "{{ url('admin/product') }}/" + productID,
                         data: {
                             'productName': productName.val(),
                             'productSlug': productSlug.val(),
@@ -387,7 +431,7 @@
                             'gallery': gallery,
                             '_token': token
                         },
-                        success: function (data) {
+                        success: function(data) {
                             if (data['status'] === 'success') {
                                 toastr.success(data["message"]);
                                 $('.modal').modal('hide');
@@ -408,29 +452,29 @@
             });
 
 
-            $(document).on("click", ".btn-delete", function () {
+            $(document).on("click", ".btn-delete", function() {
                 var id = $(this).attr('data-id');;
                 Swal.fire({
-                    title:"Are you sure?",
-                    text:"You won't be able to revert this!",
-                    type:"warning",
-                    showCancelButton:!0,
-                    confirmButtonColor:"#3085d6"
-                    ,cancelButtonColor:"#d33"
-                    ,confirmButtonText:"Yes, delete it!"
-                }).then(  function(t){
-                    if(t.value){
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    type: "warning",
+                    showCancelButton: !0,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then(function(t) {
+                    if (t.value) {
                         $.ajax({
                             headers: {
                                 'X-CSRF-TOKEN': token
                             },
                             type: "DELETE",
-                            url: "{{url('admin/product/')}}/" + id,
+                            url: "{{ url('admin/product/') }}/" + id,
                             data: {
                                 '_token': token
                             },
                             contentType: "application/json",
-                            success: function (response) {
+                            success: function(response) {
                                 var data = JSON.parse(response);
                                 if (data['status'] === 'success') {
                                     $(this).parent('tr').remove();
@@ -440,28 +484,29 @@
                                     if (data['status'] === 'failed') {
                                         toastr.error(data["message"]);
                                     } else {
-                                        toastr.error('Something wrong ! Please try again.');
+                                        toastr.error(
+                                            'Something wrong ! Please try again.');
                                     }
                                 }
                             }
                         });
-                     }
+                    }
                 })
 
             });
 
-            $(document).on('click', '.btn-status', function () {
+            $(document).on('click', '.btn-status', function() {
                 var status = $(this).attr('data-status');
                 var id = $(this).val();
                 $.ajax({
                     type: "post",
-                    url: "{{url('admin/product/status')}}",
+                    url: "{{ url('admin/product/status') }}",
                     data: {
                         'status': status,
                         'id': id,
                         '_token': token
                     },
-                    success: function (response) {
+                    success: function(response) {
                         var data = JSON.parse(response);
                         if (data['status'] == 'success') {
                             toastr.success(data["message"]);
@@ -477,33 +522,33 @@
                 });
             });
 
-            $(document).on("click", ".btn-danger", function (e) {
+            $(document).on("click", ".btn-danger", function(e) {
                 e.preventDefault();
                 var rows_selected = table.column(0).checkboxes.selected();
                 var ids = [];
-                $.each(rows_selected, function (index, rowId) {
+                $.each(rows_selected, function(index, rowId) {
                     ids[index] = rowId;
                 });
-                if(ids.length > 0){
+                if (ids.length > 0) {
                     Swal.fire({
-                        title:"Are you sure?",
-                        text:"You won't be able to revert this!",
-                        type:"warning",
-                        showCancelButton:!0,
-                        confirmButtonColor:"#3085d6"
-                        ,cancelButtonColor:"#d33"
-                        ,confirmButtonText:"Yes, delete it!"
-                    }).then(function(t){
+                        title: "Are you sure?",
+                        text: "You won't be able to revert this!",
+                        type: "warning",
+                        showCancelButton: !0,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, delete it!"
+                    }).then(function(t) {
                         e.preventDefault();
-                        if(t.value){
+                        if (t.value) {
                             $.ajax({
                                 type: "get",
-                                url: "{{url('admin/product/delete')}}",
+                                url: "{{ url('admin/product/delete') }}",
                                 data: {
                                     'ids': ids
                                 },
                                 contentType: "application/json",
-                                success: function (response) {
+                                success: function(response) {
                                     if (response['status'] === 'success') {
                                         toastr.success(response["message"]);
                                         table.ajax.reload();
@@ -511,7 +556,9 @@
                                         if (response['status'] === 'failed') {
                                             toastr.error(response["message"]);
                                         } else {
-                                            toastr.error('Something wrong ! Please try again.');
+                                            toastr.error(
+                                                'Something wrong ! Please try again.'
+                                                );
                                         }
                                     }
                                 }

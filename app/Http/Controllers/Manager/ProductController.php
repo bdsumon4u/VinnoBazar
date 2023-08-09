@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Manager;
+
 use App\Category;
 use App\Media;
 use Illuminate\Support\Facades\DB;
@@ -22,9 +23,9 @@ class ProductController extends Controller
     public function index()
     {
         $store = Store::all()->count();
-        if($store>0){
+        if ($store > 0) {
             return view('manager.product.index');
-        }else{
+        } else {
             return redirect('manager/store');
         }
     }
@@ -54,7 +55,6 @@ class ProductController extends Controller
             $latestStock->save();
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Product';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Product';
@@ -65,37 +65,36 @@ class ProductController extends Controller
     public function show(Request $request)
     {
 
-        return DataTables::of(Product::with('media','categories'))
+        return DataTables::of(Product::with('media', 'categories'))
             ->editColumn('productImage', function ($product) {
-                return "<img src='".asset('/public/product/thumbnail/'.$product->productImage)."' class='img-fluid avatar-lg rounded'>";
+                return "<img src='" . asset('/product/thumbnail/' . $product->productImage) . "' class='img-fluid avatar-lg rounded'>";
             })
             ->editColumn('ProductName', function ($product) {
-                return "<a href=".url('product/'.$product->ProductSlug).">".$product->ProductName."</a>";
+                return "<a href=" . url('product/' . $product->ProductSlug) . ">" . $product->ProductName . "</a>";
             })
             ->addColumn('status', function ($product) {
                 if ($product->status == 'Active') {
-                    return '<button type="button" class="btn btn-success btn-xs btn-status" data-status="Inactive" name="status" value="'.$product->id.'">Active</button>';
-                }else{
-                    return '<button type="button" class="btn btn-warning btn-xs btn-status" data-status="Active" name="status" value="'.$product->id.'" >Inactive</button>';
+                    return '<button type="button" class="btn btn-success btn-xs btn-status" data-status="Inactive" name="status" value="' . $product->id . '">Active</button>';
+                } else {
+                    return '<button type="button" class="btn btn-warning btn-xs btn-status" data-status="Active" name="status" value="' . $product->id . '" >Inactive</button>';
                 }
             })
             ->addColumn('categories', function ($product) {
                 $CategoryName = array();
-                foreach ($product->categories as $category){
-                    array_push($CategoryName,$category->categoryName);
+                foreach ($product->categories as $category) {
+                    array_push($CategoryName, $category->categoryName);
                 }
                 return implode(', ', $CategoryName);
             })
             ->addColumn('action', function ($product) {
-                return "<a href='javascript:void(0);' data-id='" .$product->id."' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>";
+                return "<a href='javascript:void(0);' data-id='" . $product->id . "' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>";
             })
             ->escapeColumns([])->make();
-
     }
 
     public function edit($id)
     {
-        $product = Product::with('media','categories')->where('products.id','=',$id)->first();
+        $product = Product::with('media', 'categories')->where('products.id', '=', $id)->first();
         return json_encode($product);
     }
 
@@ -120,7 +119,6 @@ class ProductController extends Controller
         if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Product';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Product';
@@ -131,10 +129,10 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $result = Product::find($id)->delete();
-        if($result){
+        if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Delete Product';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete Product';
         }
@@ -155,13 +153,11 @@ class ProductController extends Controller
                 $response['status'] = 'success';
                 $response['message'] = 'Successful to upload image';
                 $response['url'] = $imageName;
-
             } else {
                 $response['status'] = 'failed';
                 $response['message'] = 'Unsuccessful to upload Product';
             }
-
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to upload Product';
         }
@@ -173,21 +169,21 @@ class ProductController extends Controller
         $product = Product::find($request['id']);
         $product->status = $request['status'];
         $result = $product->save();
-        if($result){
+        if ($result) {
             $response['status'] = 'success';
-            $response['message'] = 'Successfully Update Status to '.$request['status'];
-        }else{
+            $response['message'] = 'Successfully Update Status to ' . $request['status'];
+        } else {
             $response['status'] = 'failed';
-            $response['message'] = 'Unsuccessful to update Status '.$request['status'];
+            $response['message'] = 'Unsuccessful to update Status ' . $request['status'];
         }
         return json_encode($response);
     }
 
     public function category(Request $request)
     {
-        if(isset($request['q'])){
-            $couriers = Category::query()->where('categoryName','like','%'.$request['q'].'%')->get();
-        }else{
+        if (isset($request['q'])) {
+            $couriers = Category::query()->where('categoryName', 'like', '%' . $request['q'] . '%')->get();
+        } else {
             $couriers = Category::all();
         }
         $courier = array();
@@ -202,13 +198,13 @@ class ProductController extends Controller
 
     public function delete(Request $request)
     {
-        if($request->ids){
+        if ($request->ids) {
             foreach ($request->ids as $id) {
                 Product::find($id)->delete();
                 $response['status'] = 'success';
                 $response['message'] = 'Successfully Delete Product';
             }
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete Product';
         }
@@ -220,27 +216,27 @@ class ProductController extends Controller
     {
         set_time_limit(0);
 
-        if(empty($_REQUEST['url'])) return;
+        if (empty($_REQUEST['url'])) return;
 
         $syncProducts = json_decode($this->getProducts($_REQUEST['url']));
         $orderCount = 0;
-        foreach ($syncProducts as $syncProduct){
-            $checkProduct = Product::query()->where('productCode','=',$syncProduct->get_sku)->first();
-            if(empty($checkProduct)) {
+        foreach ($syncProducts as $syncProduct) {
+            $checkProduct = Product::query()->where('productCode', '=', $syncProduct->get_sku)->first();
+            if (empty($checkProduct)) {
 
                 $image = $syncProduct->image;
                 $full = public_path('product/');
                 $thumbnail = public_path('product/thumbnail/');
-                if (!is_dir($full)){
-                    File::makeDirectory($full,0777,true);
+                if (!is_dir($full)) {
+                    File::makeDirectory($full, 0777, true);
                 }
-                if (!is_dir($thumbnail)){
-                    File::makeDirectory($thumbnail,0777,true);
+                if (!is_dir($thumbnail)) {
+                    File::makeDirectory($thumbnail, 0777, true);
                 }
 
                 $imageName = uniqid() . '.jpg';
-                $full = $full.$imageName;
-                $thumbnail = $thumbnail.$imageName;
+                $full = $full . $imageName;
+                $thumbnail = $thumbnail . $imageName;
 
 
                 $img = Image::make(file_get_contents($image))->fit(450, 450)->save($full);
@@ -269,7 +265,6 @@ class ProductController extends Controller
                             'product_id' => $newProduct->id,
                             'category_id' => $category->id
                         ]);
-
                     } else {
                         $category = new Category();
                         $category->categoryName = $categories->name;
@@ -285,13 +280,12 @@ class ProductController extends Controller
                     }
                 }
                 $orderCount++;
-
             }
         }
-        if($orderCount > 0){
+        if ($orderCount > 0) {
             $response['status'] = 'success';
             $response['products'] = $orderCount;
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['products'] = $orderCount;
         }
@@ -315,7 +309,6 @@ class ProductController extends Controller
     }
     public function slug($string)
     {
-        return  str_replace(' ','-',strtolower($string));
+        return  str_replace(' ', '-', strtolower($string));
     }
-
 }

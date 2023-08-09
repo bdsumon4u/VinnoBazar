@@ -29,17 +29,17 @@ class MediaController extends Controller
     public function create()
     {
         return datatables()->of(Media::latest()->get())
-            ->addColumn('image', function(Media $media) {
-                return '<img src="'.asset('/public/product/thumbnail/'.$media->url).'" alt="image" class="img-fluid avatar-md rounded">';
+            ->addColumn('image', function (Media $media) {
+                return '<img src="' . asset('/product/thumbnail/' . $media->url) . '" alt="image" class="img-fluid avatar-md rounded">';
             })
-            ->addColumn('created_at', function(Media $media) {
+            ->addColumn('created_at', function (Media $media) {
                 return  Carbon::parse($media->created_at)->diffForHumans();
             })
-            ->addColumn('action', function(Media $media) {
-                return "<a href='javascript:void(0);' data-id='" .$media->id."' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>
-                    <a href='javascript:void(0);' data-id='" .$media->id. "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
+            ->addColumn('action', function (Media $media) {
+                return "<a href='javascript:void(0);' data-id='" . $media->id . "' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>
+                    <a href='javascript:void(0);' data-id='" . $media->id . "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
             })
-            ->only(['id','name','image','created_at','action'])
+            ->only(['id', 'name', 'image', 'created_at', 'action'])
             ->escapeColumns([])->toJson();
     }
 
@@ -58,17 +58,17 @@ class MediaController extends Controller
             $full = public_path('product/');
             $thumbnail = public_path('product/thumbnail/');
 
-            if (!is_dir($full)){
-                File::makeDirectory($full,0777,true);
+            if (!is_dir($full)) {
+                File::makeDirectory($full, 0777, true);
             }
-            if (!is_dir($thumbnail)){
-                File::makeDirectory($thumbnail,0777,true);
+            if (!is_dir($thumbnail)) {
+                File::makeDirectory($thumbnail, 0777, true);
             }
 
             $imageName = uniqid() . '.jpg';
-            $original = $original.$imageName;
-            $full = $full.$imageName;
-            $thumbnail = $thumbnail.$imageName;
+            $original = $original . $imageName;
+            $full = $full . $imageName;
+            $thumbnail = $thumbnail . $imageName;
 
             Image::make($image)->save($original);
             Image::make($image)->fit(450, 450)->save($full);
@@ -77,19 +77,17 @@ class MediaController extends Controller
             $media = new Media();
             $media->name = $imageName;
             $media->url = $imageName;
-            $result=  $media->save();
+            $result =  $media->save();
 
             if ($result) {
                 $response['status'] = 'success';
                 $response['message'] = 'Successful to upload image';
                 $response['url'] = $imageName;
-
             } else {
                 $response['status'] = 'failed';
                 $response['message'] = 'Unsuccessful to upload image';
             }
-
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to upload image';
         }
@@ -104,7 +102,6 @@ class MediaController extends Controller
      */
     public function show($id)
     {
-
     }
 
     /**
@@ -134,7 +131,6 @@ class MediaController extends Controller
         if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Update City';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Update City';
@@ -150,16 +146,16 @@ class MediaController extends Controller
      */
     public function destroy($id)
     {
-        if($id){
+        if ($id) {
             $media = Media::find($id);
-            $full = public_path('product/'.$media->url);
-            $thumbnail = public_path('product/thumbnail/'.$media->url);
+            $full = public_path('product/' . $media->url);
+            $thumbnail = public_path('product/thumbnail/' . $media->url);
             $media->delete();
             File::delete($full);
             File::delete($thumbnail);
             $response['status'] = 'success';
             $response['message'] = 'Successfully Delete image';
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete image';
         }
@@ -168,15 +164,15 @@ class MediaController extends Controller
     public function iframe(Request $request)
     {
         $multiple =  $request->multiple;
-        return view('admin.media.iframe',compact('multiple'));
+        return view('admin.media.iframe', compact('multiple'));
     }
     public function delete(Request $request)
     {
-        if($request->ids){
+        if ($request->ids) {
             foreach ($request->ids as $id) {
                 $media = Media::find($id);
-                $full = public_path('product/'.$media->url);
-                $thumbnail = public_path('product/thumbnail/'.$media->url);
+                $full = public_path('product/' . $media->url);
+                $thumbnail = public_path('product/thumbnail/' . $media->url);
                 $media->delete();
                 File::delete($full);
                 File::delete($thumbnail);
@@ -184,7 +180,7 @@ class MediaController extends Controller
                 $response['status'] = 'success';
                 $response['message'] = 'Successfully Delete image';
             }
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete image';
         }
@@ -194,17 +190,17 @@ class MediaController extends Controller
     {
         $multiple = $_REQUEST['multiple'];
         return datatables()->of(Media::latest()->get())
-            ->addColumn('image', function(Media $media) {
-                return '<img src="'.asset('/public/product/thumbnail/'.$media->url).'" alt="image" class="img-fluid avatar-md rounded">';
+            ->addColumn('image', function (Media $media) {
+                return '<img src="' . asset('/product/thumbnail/' . $media->url) . '" alt="image" class="img-fluid avatar-md rounded">';
             })
-            ->addColumn('created_at', function(Media $media) {
+            ->addColumn('created_at', function (Media $media) {
                 return  Carbon::parse($media->created_at)->diffForHumans();
             })
-            ->addColumn('action', function(Media $media) use ($multiple) {
-                return  '<a href="javascript:void(0);" data-path="'.asset('/public/product/thumbnail/'.$media->url).'" data-src="'.$media->url.'" data-multiple="'.$multiple.'" data-id="'.$media->id.'" class="action-icon btn-select"> <i class="fas fa-check-square"></i></a>
-                        <a href="javascript:void(0);" data-id="'.$media->id.'" class="action-icon btn-single-delete"> <i class="fas fa-trash"></i></a>';
+            ->addColumn('action', function (Media $media) use ($multiple) {
+                return  '<a href="javascript:void(0);" data-path="' . asset('/product/thumbnail/' . $media->url) . '" data-src="' . $media->url . '" data-multiple="' . $multiple . '" data-id="' . $media->id . '" class="action-icon btn-select"> <i class="fas fa-check-square"></i></a>
+                        <a href="javascript:void(0);" data-id="' . $media->id . '" class="action-icon btn-single-delete"> <i class="fas fa-trash"></i></a>';
             })
-            ->only(['id','name','image','created_at','action'])
+            ->only(['id', 'name', 'image', 'created_at', 'action'])
             ->escapeColumns([])->toJson();
     }
 }

@@ -46,7 +46,7 @@ class OrderController extends Controller
     // Order Store
     public function store(Request $request)
     {
-        if (! preg_match('/^(01)[0-9]{9}$/',$customerPhone = $request['data']['customerPhone'])) {
+        if (!preg_match('/^(01)[0-9]{9}$/', $customerPhone = $request['data']['customerPhone'])) {
             $response['status'] = 'failed';
             $response['message'] = 'Phone no. must have 11 digits';
             return json_encode($response);
@@ -55,7 +55,7 @@ class OrderController extends Controller
         // old orders
         $old_orders = DB::table('orders')->whereIn('id', function ($query) use ($customerPhone) {
             $query->select('order_id')->from('customers')
-                ->where('customerPhone', 'like', '%'.$customerPhone.'%');
+                ->where('customerPhone', 'like', '%' . $customerPhone . '%');
         })->orderByDesc('id')->get();
 
         // is_repeat = if old orders are more than 0
@@ -146,11 +146,11 @@ class OrderController extends Controller
         if ($status == 'Pending Invoiced') {
             $orders = $orders->whereIn('orders.status', ['Completed', 'Pending Invoiced']);
         }
-         if ($status == 'Customer On Hold') {
+        if ($status == 'Customer On Hold') {
             $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer On Hold']);
         }
         if ($status == 'Delivered') {
-            $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer Confirm','Customer On Hold','Request to Return']);
+            $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer Confirm', 'Customer On Hold', 'Request to Return']);
         }
         if ($status != 'All' && $status != 'Pending Invoiced'  && $status != 'Customer On Hold') {
             $orders = $orders->where('orders.status', 'like', $status);
@@ -164,7 +164,7 @@ class OrderController extends Controller
             $orders = $orders->Where('customers.customerPhone', 'like', "%{$columns[2]['search']['value']}%");
         }
         if ($columns[5]['search']['value']) {
-            $orders = $orders->Where('orders.courier_id', '=',$columns[5]['search']['value']);
+            $orders = $orders->Where('orders.courier_id', '=', $columns[5]['search']['value']);
         }
         if ($columns[6]['search']['value']) {
             if ($status == 'Delivered') {
@@ -179,7 +179,7 @@ class OrderController extends Controller
             $orders = $orders->Where('orders.memo', 'like', "%{$columns[8]['search']['value']}%");
         }
         if ($columns[9]['search']['value']) {
-            $orders = $orders->Where('orders.user_id', '=',$columns[9]['search']['value']);
+            $orders = $orders->Where('orders.user_id', '=', $columns[9]['search']['value']);
         }
         return DataTables::of($orders->latest('id'))
             ->setRowClass(function ($row) {
@@ -209,7 +209,6 @@ class OrderController extends Controller
                 <a href='javascript:void(0);' data-id='" . $orders->id . "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
                 } else {
                     return "<a href='javascript:void(0);' data-id='" . $orders->id . "' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>";
-
                 }
             })
             ->addColumn('statusButton', function ($orders) {
@@ -230,7 +229,7 @@ class OrderController extends Controller
                     if ($orders->courier) {
                         $return = '';
                         foreach (json_decode($orders->courier, true) as $prop => $val) {
-                            $return .= '<div>'.$prop.': <strong>'.$val.'</strong></div>';
+                            $return .= '<div>' . $prop . ': <strong>' . $val . '</strong></div>';
                         }
                         return $return;
                     }
@@ -240,8 +239,6 @@ class OrderController extends Controller
                 }
             })
             ->escapeColumns([])->make();
-
-
     }
 
     public function getProductsDetails($orderID)
@@ -258,12 +255,11 @@ class OrderController extends Controller
     public function getNotificationDetails($orderID)
     {
         $notification = Notification::query()->where('order_id', '=', $orderID)->latest('id')->get()->first();
-        if($notification){
+        if ($notification) {
             return $notification->notificaton;
-        }else{
+        } else {
             return 'Order Has Been Created';
         }
-        
     }
 
 
@@ -290,7 +286,7 @@ class OrderController extends Controller
     // Update Order
     public function update(Request $request, $id)
     {
-        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+        if (!preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
             $response['status'] = 'failed';
             $response['message'] = 'Phone no. must have 11 digits';
             return json_encode($response);
@@ -374,11 +370,12 @@ class OrderController extends Controller
         return json_encode($response);
     }
 
-    public function pathao(Request $request) {
+    public function pathao(Request $request)
+    {
         $response = ['status' => 'success', 'message' => 'Booked in Pathao'];
-        foreach(Order::find($request->ids) as $order) {
+        foreach (Order::find($request->ids) as $order) {
             if ($consignment_id = json_decode($order->courier, true)['consignment_id'] ?? null) {
-                $details =\App\Pathao\Facade\Pathao::order()->orderDetails($consignment_id);
+                $details = \App\Pathao\Facade\Pathao::order()->orderDetails($consignment_id);
                 if ($details->order_status != 'Pickup Cancel') continue;
             }
 
@@ -386,7 +383,7 @@ class OrderController extends Controller
             $order->courier_id = 34;
             $phoneNumber = $customer->customerPhone;
             $address = $customer->customerAddress;
-            if (! preg_match('/^01\d{9}$/', $phoneNumber)) {
+            if (!preg_match('/^01\d{9}$/', $phoneNumber)) {
                 $phoneNumber = $customer->customerAddress;
                 $address = $customer->customerPhone;
             }
@@ -421,7 +418,7 @@ class OrderController extends Controller
                 $order->forceFill(['courier' => ['booking' => 'Pathao'] + $courier])->save();
             } catch (\Exception $e) {
                 $errors = collect($e->errors)->values()->flatten()->toArray();
-                $response = ['status' => 'failed', 'message' => $order->invoiceID.': '.($errors[0] ?? 'Unknown Error From Pathao')];
+                $response = ['status' => 'failed', 'message' => $order->invoiceID . ': ' . ($errors[0] ?? 'Unknown Error From Pathao')];
             }
         }
 
@@ -459,7 +456,6 @@ class OrderController extends Controller
         } else {
             return view('admin.order.index', compact('status', 'users'));
         }
-
     }
     // get Users
     public function users(Request $request)
@@ -496,7 +492,7 @@ class OrderController extends Controller
             if (App::environment('local')) {
                 $item['productImage'] = url('/product/' . $item['productImage']);
             } else {
-                $item['productImage'] = url('/public/product/' . $item['productImage']);
+                $item['productImage'] = url('/product/' . $item['productImage']);
             }
 
             $product[] = array(
@@ -719,7 +715,7 @@ class OrderController extends Controller
                     "name" => "Customer Confirm",
                     "color" => "bg-warning"
                 ),
-                 "Request to Return" => array(
+                "Request to Return" => array(
                     "name" => "Request to Return",
                     "color" => "bg-warning"
                 ),
@@ -770,7 +766,6 @@ class OrderController extends Controller
     //
     public function view(Request $request)
     {
-
     }
 
     // Create Invoice ID
@@ -815,8 +810,8 @@ class OrderController extends Controller
                     } else {
                         $user_id = $user->id;
                     }
-                    
-                    
+
+
                     $order = new Order();
                     $order->invoiceID = $this->uniqueID();
                     $order->web_ID = $syncOrder->wp_id;
@@ -825,12 +820,12 @@ class OrderController extends Controller
                     $order->user_id = $user_id;
                     $order->store_id = $store->id;
 
-                    if(isset($syncOrder->deliveryCharge)){
+                    if (isset($syncOrder->deliveryCharge)) {
                         $order->deliveryCharge = $syncOrder->deliveryCharge;
-                    }else{
+                    } else {
                         $order->deliveryCharge = 100;
                     }
-                    
+
                     $result = $order->save();
                     $products = $syncOrder->products;
                     if ($result) {
@@ -874,7 +869,6 @@ class OrderController extends Controller
                     //echo 'Exist';
                 }
             }
-
         }
 
         if ($orderCount > 0) {
@@ -1094,7 +1088,6 @@ class OrderController extends Controller
                     $orderCount++;
                 }
             }
-
         }
         if ($orderCount > 0) {
             $response['status'] = 'success';
@@ -1135,7 +1128,6 @@ class OrderController extends Controller
             return $notification;
         });
         return json_encode($notification);
-
     }
 
     // Update Note of Order
@@ -1158,7 +1150,6 @@ class OrderController extends Controller
         }
         return json_encode($response);
         die();
-
     }
 
     // Change time to facebook Style
@@ -1250,10 +1241,10 @@ class OrderController extends Controller
             ->where(function ($query) use ($customer) {
                 $query->where('customers.customerPhone', 'like', $customer->customerPhone);
             })->get();
-            // ->where([
-            //     ['customers.order_id', '!=', $order_id],
-            //     ['customers.customerPhone', 'like', $customer->customerPhone]
-            // ])->get();
+        // ->where([
+        //     ['customers.order_id', '!=', $order_id],
+        //     ['customers.customerPhone', 'like', $customer->customerPhone]
+        // ])->get();
         $order['data'] = $orders->map(function ($order) {
             $products = DB::table('order_products')->select('order_products.*')->where('order_id', '=', $order->id)->get();
             $orderProducts = '';
@@ -1265,7 +1256,7 @@ class OrderController extends Controller
         });
         return json_encode($order);
 
-//        return $orders;
+        //        return $orders;
     }
 
     // Get Status Wise order Count
@@ -1280,7 +1271,7 @@ class OrderController extends Controller
         $response['pendingInvoiced'] = DB::table('orders')->where('status', 'like', 'Completed')->orWhere('orders.status', 'like', 'Pending Invoiced')->count();
         $response['invoiced'] = DB::table('orders')->where('status', 'like', 'Invoiced')->count();
         $response['stockOut'] = DB::table('orders')->where('status', 'like', 'Stock Out')->count();
-        $response['delivered'] = DB::table('orders')->whereIn('orders.status', ['Delivered', 'Customer Confirm','Customer On Hold','Request to Return'])->count();
+        $response['delivered'] = DB::table('orders')->whereIn('orders.status', ['Delivered', 'Customer Confirm', 'Customer On Hold', 'Request to Return'])->count();
         $response['customerOnHold'] = DB::table('orders')->whereIn('orders.status', ['Delivered', 'Customer On Hold'])->count();
         $response['customerConfirm'] = DB::table('orders')->where('status', 'like', 'Customer Confirm')->count();
         $response['requestToReturn'] = DB::table('orders')->where('status', 'like', 'Request to Return')->count();
@@ -1314,7 +1305,6 @@ class OrderController extends Controller
     {
         $invoice = Invoice::find($id);
         return view('admin.order.print', compact('invoice'));
-
     }
 
     public function curl_get_file_contents($URL)
@@ -1354,8 +1344,8 @@ class OrderController extends Controller
             'number' => "$customerPhone",
             'message' => "$text"
         );
-        
- 
+
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
@@ -1384,7 +1374,6 @@ class OrderController extends Controller
 
     public function sendMemoNumbers(Request $request)
     {
-
     }
 
 
@@ -1413,5 +1402,4 @@ class OrderController extends Controller
         return json_encode($response);
         die();
     }
-
 }

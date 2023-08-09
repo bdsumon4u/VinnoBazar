@@ -21,22 +21,21 @@ class CategoryController extends Controller
     public function create()
     {
         return datatables()->of(Category::latest()->get())
-            ->addColumn('image', function(Category $data) {
-                return '<img src="'.asset('/public/product/thumbnail/'.$data->categoryImage).'" alt="image" class="img-fluid avatar-md rounded">';
+            ->addColumn('image', function (Category $data) {
+                return '<img src="' . asset('/product/thumbnail/' . $data->categoryImage) . '" alt="image" class="img-fluid avatar-md rounded">';
             })
-            ->addColumn('action', function(Category $data) {
-                return "<a href='javascript:void(0);' data-id='" .$data->id."' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>
-                    <a href='javascript:void(0);' data-id='" .$data->id. "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
-
+            ->addColumn('action', function (Category $data) {
+                return "<a href='javascript:void(0);' data-id='" . $data->id . "' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>
+                    <a href='javascript:void(0);' data-id='" . $data->id . "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
             })
-            ->editColumn('categoryName', function(Category $data) {
-                return "<a href=".url('product-category/'.$data->categorySlug).">".$data->categoryName."</a>";
+            ->editColumn('categoryName', function (Category $data) {
+                return "<a href=" . url('product-category/' . $data->categorySlug) . ">" . $data->categoryName . "</a>";
             })
-            ->editColumn('status', function(Category $data) {
-                if($data->status == 'Active'){
-                    return '<button type="button" class="btn btn-success btn-xs btn-status" data-status="Inactive" name="status" value="'. $data->id . '">Active</button>';
-                }else{
-                    return '<button type="button" class="btn btn-warning btn-xs btn-status" data-status="Active" name="status" value="'. $data->id . '" >Inactive</button>';
+            ->editColumn('status', function (Category $data) {
+                if ($data->status == 'Active') {
+                    return '<button type="button" class="btn btn-success btn-xs btn-status" data-status="Inactive" name="status" value="' . $data->id . '">Active</button>';
+                } else {
+                    return '<button type="button" class="btn btn-warning btn-xs btn-status" data-status="Active" name="status" value="' . $data->id . '" >Inactive</button>';
                 }
             })
             ->escapeColumns([])->toJson();
@@ -58,7 +57,6 @@ class CategoryController extends Controller
         if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Category';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Category';
@@ -106,7 +104,6 @@ class CategoryController extends Controller
         if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Category';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Category';
@@ -124,10 +121,10 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
         $result = $category->delete();
-        if($result){
+        if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Delete City';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete City';
         }
@@ -138,24 +135,24 @@ class CategoryController extends Controller
         $category = Category::find($request->id);
         $category->status = $request->status;
         $result = $category->save();
-        if($result){
+        if ($result) {
             $response['status'] = 'success';
-            $response['message'] = 'Successfully Update Status to '.$request['status'];
-        }else{
+            $response['message'] = 'Successfully Update Status to ' . $request['status'];
+        } else {
             $response['status'] = 'failed';
-            $response['message'] = 'Unsuccessful to update Status '.$request['status'];
+            $response['message'] = 'Unsuccessful to update Status ' . $request['status'];
         }
         return response()->json($response, 201);
     }
     public function delete(Request $request)
     {
-        if($request->ids){
+        if ($request->ids) {
             foreach ($request->ids as $id) {
                 Category::find($id)->delete();
                 $response['status'] = 'success';
                 $response['message'] = 'Successfully Delete Product';
             }
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete Product';
         }
@@ -164,6 +161,6 @@ class CategoryController extends Controller
 
     public function slug($string)
     {
-        return  str_replace(' ','-',strtolower($string));
+        return  str_replace(' ', '-', strtolower($string));
     }
 }

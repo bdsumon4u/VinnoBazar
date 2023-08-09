@@ -32,7 +32,7 @@ class OrderController extends Controller
     public function index()
     {
         $status = 'all';
-        return view('manager.order.index',compact('status'));
+        return view('manager.order.index', compact('status'));
     }
 
     // Create Order Page
@@ -40,13 +40,13 @@ class OrderController extends Controller
     {
         $unique =  $this->uniqueID();
         $couriers = Courier::all();
-        return view('manager.order.create',compact('unique','couriers'));
+        return view('manager.order.create', compact('unique', 'couriers'));
     }
 
     // Order Store
     public function store(Request $request)
     {
-        if (! preg_match('/^(01)[0-9]{9}$/',$customerPhone = $request['data']['customerPhone'])) {
+        if (!preg_match('/^(01)[0-9]{9}$/', $customerPhone = $request['data']['customerPhone'])) {
             $response['status'] = 'failed';
             $response['message'] = 'Phone no. must have 11 digits';
             return json_encode($response);
@@ -55,7 +55,7 @@ class OrderController extends Controller
         // old orders
         $old_orders = DB::table('orders')->whereIn('id', function ($query) use ($customerPhone) {
             $query->select('order_id')->from('customers')
-                ->where('customerPhone', 'like', '%'.$customerPhone.'%');
+                ->where('customerPhone', 'like', '%' . $customerPhone . '%');
         })->orderByDesc('id')->get();
 
         // is_repeat = if old orders are more than 0
@@ -103,11 +103,11 @@ class OrderController extends Controller
 
             $notification = new Notification();
             $notification->order_id = $order->id;
-            $notification->notificaton = '#BB-'.$order->id.' Order Has Been Created by '. Auth::user()->name;
+            $notification->notificaton = '#BB-' . $order->id . ' Order Has Been Created by ' . Auth::user()->name;
             $notification->user_id =  Auth::id();
             $notification->save();
 
-            if($request['data']['paymentID'] != '' && $request['data']['paymentID'] !='' ){
+            if ($request['data']['paymentID'] != '' && $request['data']['paymentID'] != '') {
                 $paymentComplete = new PaymentCompelte();
                 $paymentComplete->order_id = $order->id;
                 $paymentComplete->payment_type_id = $request['data']['paymentTypeID'];
@@ -120,10 +120,10 @@ class OrderController extends Controller
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Order';
         } else {
-            Customer::where('order_id','=',$order->id)->delete();
-            OrderProducts::where('order_id','=',$order->id)->delete();
-            Notification::where('order_id','=',$order->id)->delete();
-            Order::where('id','=',$order->id)->delete();
+            Customer::where('order_id', '=', $order->id)->delete();
+            OrderProducts::where('order_id', '=', $order->id)->delete();
+            Notification::where('order_id', '=', $order->id)->delete();
+            Order::where('id', '=', $order->id)->delete();
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Order';
         }
@@ -131,7 +131,7 @@ class OrderController extends Controller
         die();
     }
 
-public function show(Request $request)
+    public function show(Request $request)
     {
         $columns = $request->input('columns');
         $status = $request->input('status');
@@ -144,11 +144,11 @@ public function show(Request $request)
         if ($status == 'Pending Invoiced') {
             $orders = $orders->whereIn('orders.status', ['Completed', 'Pending Invoiced']);
         }
-         if ($status == 'Customer On Hold') {
+        if ($status == 'Customer On Hold') {
             $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer On Hold']);
         }
         if ($status == 'Delivered') {
-            $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer Confirm','Customer On Hold','Request to Return']);
+            $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer Confirm', 'Customer On Hold', 'Request to Return']);
         }
         if ($status != 'All' && $status != 'Pending Invoiced'  && $status != 'Customer On Hold') {
             $orders = $orders->where('orders.status', 'like', $status);
@@ -162,7 +162,7 @@ public function show(Request $request)
             $orders = $orders->Where('customers.customerPhone', 'like', "%{$columns[2]['search']['value']}%");
         }
         if ($columns[5]['search']['value']) {
-            $orders = $orders->Where('orders.courier_id', '=',$columns[5]['search']['value']);
+            $orders = $orders->Where('orders.courier_id', '=', $columns[5]['search']['value']);
         }
         if ($columns[6]['search']['value']) {
             if ($status == 'Delivered') {
@@ -177,7 +177,7 @@ public function show(Request $request)
             $orders = $orders->Where('orders.memo', 'like', "%{$columns[8]['search']['value']}%");
         }
         if ($columns[9]['search']['value']) {
-            $orders = $orders->Where('orders.user_id', '=',$columns[9]['search']['value']);
+            $orders = $orders->Where('orders.user_id', '=', $columns[9]['search']['value']);
         }
         return DataTables::of($orders->latest('id'))
             ->setRowClass(function ($row) {
@@ -207,7 +207,6 @@ public function show(Request $request)
                 <a href='javascript:void(0);' data-id='" . $orders->id . "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
                 } else {
                     return "<a href='javascript:void(0);' data-id='" . $orders->id . "' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>";
-
                 }
             })
             ->addColumn('statusButton', function ($orders) {
@@ -228,7 +227,7 @@ public function show(Request $request)
                     if ($orders->courier) {
                         $return = '';
                         foreach (json_decode($orders->courier, true) as $prop => $val) {
-                            $return .= '<div>'.$prop.': <strong>'.$val.'</strong></div>';
+                            $return .= '<div>' . $prop . ': <strong>' . $val . '</strong></div>';
                         }
                         return $return;
                     }
@@ -238,29 +237,26 @@ public function show(Request $request)
                 }
             })
             ->escapeColumns([])->make();
-
-
     }
     public function getProductsDetails($orderID)
     {
         $products = DB::table('order_products')->select('order_products.*')->where('order_id', '=', $orderID)->get();
         $orderProducts = '';
         foreach ($products as $product) {
-            $orderProducts = $orderProducts . $product->quantity.' x '. $product->productName . '<br>';
+            $orderProducts = $orderProducts . $product->quantity . ' x ' . $product->productName . '<br>';
         }
         return rtrim($orderProducts, '<br>');
     }
 
 
-   public function getNotificationDetails($orderID)
+    public function getNotificationDetails($orderID)
     {
         $notification = Notification::query()->where('order_id', '=', $orderID)->latest('id')->get()->first();
-        if($notification){
+        if ($notification) {
             return $notification->notificaton;
-        }else{
+        } else {
             return 'Order Has Been Created';
         }
-        
     }
 
 
@@ -287,7 +283,7 @@ public function show(Request $request)
     // Update Order
     public function update(Request $request, $id)
     {
-        if (! preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
+        if (!preg_match('/^(01)[0-9]{9}$/', $request['data']['customerPhone'])) {
             $response['status'] = 'failed';
             $response['message'] = 'Phone no. must have 11 digits';
             return json_encode($response);
@@ -305,10 +301,10 @@ public function show(Request $request)
         $order->paymentAmount = $request['data']['paymentAmount'];
         $order->paymentAgentNumber = $request['data']['paymentAgentNumber'];
         $order->orderDate = $request['data']['orderDate'];
-        if(!empty($request['data']['deliveryDate'])){
+        if (!empty($request['data']['deliveryDate'])) {
             $order->deliveryDate = $request['data']['deliveryDate'];
         }
-        if(!empty($request['data']['completeDate'])){
+        if (!empty($request['data']['completeDate'])) {
             $order->completeDate = $request['data']['completeDate'];
         }
         $order->courier_id = $request['data']['courierID'];
@@ -319,12 +315,12 @@ public function show(Request $request)
 
         $result = $order->update();
         if ($result) {
-            $customer = Customer::where('order_id','=',$id)->first();
+            $customer = Customer::where('order_id', '=', $id)->first();
             $customer->customerName = $request['data']['customerName'];
             $customer->customerPhone = $request['data']['customerPhone'];
             $customer->customerAddress = $request['data']['customerAddress'];
             $customer->update();
-            OrderProducts::where('order_id','=',$id)->delete();
+            OrderProducts::where('order_id', '=', $id)->delete();
             foreach ($products as $product) {
                 $orderProducts  = new OrderProducts();
                 $orderProducts->order_id = $id;
@@ -371,18 +367,19 @@ public function show(Request $request)
         return json_encode($response);
     }
 
-    public function pathao(Request $request) {
+    public function pathao(Request $request)
+    {
         $response = ['status' => 'success', 'message' => 'Booked in Pathao'];
-        foreach(Order::find($request->ids) as $order) {
+        foreach (Order::find($request->ids) as $order) {
             if ($consignment_id = json_decode($order->courier, true)['consignment_id'] ?? null) {
-                $details =\App\Pathao\Facade\Pathao::order()->orderDetails($consignment_id);
+                $details = \App\Pathao\Facade\Pathao::order()->orderDetails($consignment_id);
                 if ($details->order_status != 'Pickup Cancel') continue;
             }
             $customer = Customer::where('order_id', '=', $order->id)->first();
             $order->courier_id = 34;
             $phoneNumber = $customer->customerPhone;
             $address = $customer->customerAddress;
-            if (! preg_match('/^01\d{9}$/', $phoneNumber)) {
+            if (!preg_match('/^01\d{9}$/', $phoneNumber)) {
                 $phoneNumber = $customer->customerAddress;
                 $address = $customer->customerPhone;
             }
@@ -417,7 +414,7 @@ public function show(Request $request)
                 $order->forceFill(['courier' => ['booking' => 'Pathao'] + $courier])->save();
             } catch (\Exception $e) {
                 $errors = collect($e->errors)->values()->flatten()->toArray();
-                $response = ['status' => 'failed', 'message' => $order->invoiceID.': '.($errors[0] ?? 'Unknown Error From Pathao')];
+                $response = ['status' => 'failed', 'message' => $order->invoiceID . ': ' . ($errors[0] ?? 'Unknown Error From Pathao')];
             }
         }
 
@@ -428,12 +425,12 @@ public function show(Request $request)
     public function destroy($id)
     {
         $result = Order::find($id)->delete();
-        if($result){
-            Customer::query()->where('order_id','=',$id)->delete();
-            OrderProducts::query()->where('order_id','=',$id)->delete();
+        if ($result) {
+            Customer::query()->where('order_id', '=', $id)->delete();
+            OrderProducts::query()->where('order_id', '=', $id)->delete();
             $response['status'] = 'success';
             $response['message'] = 'Successfully Delete Order';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete Order';
         }
@@ -455,7 +452,6 @@ public function show(Request $request)
         } else {
             return view('manager.order.index', compact('status', 'users'));
         }
-
     }
     // get Users
     public function users(Request $request)
@@ -492,7 +488,7 @@ public function show(Request $request)
             if (App::environment('local')) {
                 $item['productImage'] = url('/product/' . $item['productImage']);
             } else {
-                $item['productImage'] = url('/public/product/' . $item['productImage']);
+                $item['productImage'] = url('/product/' . $item['productImage']);
             }
 
             $product[] = array(
@@ -649,7 +645,7 @@ public function show(Request $request)
         return json_encode($zone);
     }
 
-     // All Status List
+    // All Status List
     public function statusList($status, $id)
     {
         $allStatus = array(
@@ -715,7 +711,7 @@ public function show(Request $request)
                     "name" => "Customer Confirm",
                     "color" => "bg-warning"
                 ),
-                 "Request to Return" => array(
+                "Request to Return" => array(
                     "name" => "Request to Return",
                     "color" => "bg-warning"
                 ),
@@ -766,20 +762,19 @@ public function show(Request $request)
     //
     public function view(Request $request)
     {
-
     }
 
     // Create Invoice ID
     public function uniqueID()
     {
         $lastOrder = Order::latest('id')->first();
-        if($lastOrder){
+        if ($lastOrder) {
             $orderID = $lastOrder->id + 1;
-        }else{
+        } else {
             $orderID = 1;
         }
 
-        return 'BB-'.$orderID;
+        return 'BB-' . $orderID;
     }
 
     // Order Sync
@@ -788,44 +783,44 @@ public function show(Request $request)
         $stores = Store::query()->where('status', 'like', 'Active')->get();
         // dd($stores);
 
-        $orderCount = 0 ;
-        foreach ($stores as $store){
+        $orderCount = 0;
+        foreach ($stores as $store) {
 
             $syncOrders = json_decode($this->getOrders($store->storeUrl));
 
-            foreach ($syncOrders as $syncOrder){
+            foreach ($syncOrders as $syncOrder) {
 
                 $orderExist = Order::query()->where([
                     ['web_ID', '=',  $syncOrder->wp_id],
                     ['store_id', '=',  $store->id]
                 ])->get()->first();
 
-                if(!$orderExist){
+                if (!$orderExist) {
                     $user = DB::table('users')->where([
                         ['status', 'like', 'Active'],
                         ['role_id', '=', '3']
                     ])->inRandomOrder()->first();
 
-                    if(!$user){
+                    if (!$user) {
                         $user_id = 1;
-                    }else{
+                    } else {
                         $user_id = $user->id;
                     }
 
                     $order = new Order();
                     $order->invoiceID = $this->uniqueID();
                     $order->web_ID = $syncOrder->wp_id;
-                    $order->subTotal =$syncOrder->total;
+                    $order->subTotal = $syncOrder->total;
                     $order->orderDate = date('Y-m-d');
                     $order->user_id = $user_id;
                     $order->store_id = $store->id;
-                        
-                    if(isset($syncOrder->deliveryCharge)){
+
+                    if (isset($syncOrder->deliveryCharge)) {
                         $order->deliveryCharge = $syncOrder->deliveryCharge;
-                    }else{
+                    } else {
                         $order->deliveryCharge = 100;
                     }
-                    
+
                     $result = $order->save();
                     $products = $syncOrder->products;
                     if ($result) {
@@ -838,7 +833,7 @@ public function show(Request $request)
                         foreach ($products as $product) {
                             $orderProducts  = new OrderProducts();
                             $productExist = Product::query()->where('productCode', 'like', $product->sku)->get()->first();
-                            if($productExist){
+                            if ($productExist) {
                                 $orderProducts->order_id = $order->id;
                                 $orderProducts->product_id = $productExist->id;
                                 $orderProducts->productCode = $product->sku;
@@ -846,7 +841,7 @@ public function show(Request $request)
                                 $orderProducts->quantity = $product->quantity;
                                 $orderProducts->productPrice = $product->price;
                                 $orderProducts->save();
-                            }else{
+                            } else {
                                 $this->productSync();
                                 $productExist = Product::query()->where('productCode', 'like', $product->sku)->get()->first();
                                 $orderProducts->order_id = $order->id;
@@ -865,17 +860,16 @@ public function show(Request $request)
                         $notification->save();
                     }
                     $orderCount++;
-                }else{
+                } else {
                     //echo 'Exist';
                 }
             }
-
         }
 
-        if($orderCount > 0){
+        if ($orderCount > 0) {
             $response['status'] = 'success';
             $response['orders'] = $orderCount;
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['orders'] = $orderCount;
         }
@@ -902,25 +896,25 @@ public function show(Request $request)
     public function deleteAll(Request $request)
     {
         $ids = $request['ids'];
-        if($ids){
-            foreach ($ids as $id){
-                if(Auth::id() == 1){
+        if ($ids) {
+            foreach ($ids as $id) {
+                if (Auth::id() == 1) {
                     Order::query()->truncate();
                     Customer::query()->truncate();
                     OrderProducts::query()->truncate();
                     Notification::query()->truncate();
-                }else{
+                } else {
                     $result = Order::find($id)->delete();
-                    if($result){
-                        Customer::query()->where('order_id','=',$id)->delete();
-                        OrderProducts::query()->where('order_id','=',$id)->delete();
-                        Notification::query()->where('order_id','=',$id)->delete();
+                    if ($result) {
+                        Customer::query()->where('order_id', '=', $id)->delete();
+                        OrderProducts::query()->where('order_id', '=', $id)->delete();
+                        Notification::query()->where('order_id', '=', $id)->delete();
                     }
                 }
             }
             $response['status'] = 'success';
             $response['message'] = 'Successfully Delete Order';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete Order';
         }
@@ -932,21 +926,21 @@ public function show(Request $request)
     {
         $user_id = $request['user_id'];
         $ids = $request['ids'];
-        if($ids){
-            foreach ($ids as $id){
+        if ($ids) {
+            foreach ($ids as $id) {
                 $order = Order::find($id);
                 $order->user_id = $user_id;
                 $order->save();
                 $notification = new Notification();
                 $user = User::find($user_id);
                 $notification->order_id = $id;
-                $notification->notificaton = Auth::user()->name.' Successfully Assign #BB-'.$id.' Order to '. $user->name;
+                $notification->notificaton = Auth::user()->name . ' Successfully Assign #BB-' . $id . ' Order to ' . $user->name;
                 $notification->user_id =  Auth::id();
                 $notification->save();
             }
             $response['status'] = 'success';
             $response['message'] = 'Successfully Assign User to this Order';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Assign User to this Order';
         }
@@ -961,32 +955,32 @@ public function show(Request $request)
         $status = $request['status'];
         $order = Order::find($id);
 
-        if($request['status'] == 'Completed'){
+        if ($request['status'] == 'Completed') {
             $order->orderDate = date('Y-m-d');
         }
-        if($request['status'] == 'Delivered'){
+        if ($request['status'] == 'Delivered') {
             $order->deliveryDate = date('Y-m-d');
-            $orderProducts = OrderProducts::query()->where('order_id','=',$order->id)->get();
+            $orderProducts = OrderProducts::query()->where('order_id', '=', $order->id)->get();
             foreach ($orderProducts as $orderProduct) {
-                $stock =  Stock::query()->where('product_id','=',$orderProduct->product_id)->first();
+                $stock =  Stock::query()->where('product_id', '=', $orderProduct->product_id)->first();
                 $stock->stock =  $stock->stock - $orderProduct->quantity;
                 $stock->save();
             }
         }
-        if($request['status'] == 'Paid'){
+        if ($request['status'] == 'Paid') {
             $order->completeDate = date('Y-m-d');
         }
-        if($request['status'] == 'Return'){
+        if ($request['status'] == 'Return') {
             $order->completeDate = date('Y-m-d');
-            $orderProducts = OrderProducts::query()->where('order_id','=',$order->id)->get();
+            $orderProducts = OrderProducts::query()->where('order_id', '=', $order->id)->get();
             foreach ($orderProducts as $orderProduct) {
-                $stock =  Stock::query()->where('product_id','=',$orderProduct->product_id)->first();
+                $stock =  Stock::query()->where('product_id', '=', $orderProduct->product_id)->first();
                 $stock->stock =  $stock->stock + $orderProduct->quantity;
                 $stock->save();
             }
         }
 
-        if($order->courier_id || $status =='Canceled' || $status =='On Hold'  || $status =='Payment Pending' ){
+        if ($order->courier_id || $status == 'Canceled' || $status == 'On Hold'  || $status == 'Payment Pending') {
             $order->status = $status;
             $result = $order->save();
             if ($result) {
@@ -994,14 +988,14 @@ public function show(Request $request)
                 $response['message'] = 'Successfully Update Status to ' . $request['status'];
                 $notification = new Notification();
                 $notification->order_id = $id;
-                $notification->notificaton = Auth::user()->name.' Successfully Update #BB-'.$id.' Order status to '.$status;
+                $notification->notificaton = Auth::user()->name . ' Successfully Update #BB-' . $id . ' Order status to ' . $status;
                 $notification->user_id =  Auth::id();
                 $notification->save();
             } else {
                 $response['status'] = 'failed';
                 $response['message'] = 'Unsuccessful to update Status ' . $request['status'];
             }
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Please Update order courier and try again !';
         }
@@ -1015,29 +1009,29 @@ public function show(Request $request)
 
         $status = $request['status'];
         $ids = $request['ids'];
-        if($ids){
-            foreach ($ids as $id){
+        if ($ids) {
+            foreach ($ids as $id) {
                 $order = Order::find($id);
                 $order->status = $status;
 
 
-                if($status == 'Delivered'){
+                if ($status == 'Delivered') {
                     $order->deliveryDate = date('Y-m-d');
-                    $orderProducts = OrderProducts::query()->where('order_id','=',$order->id)->get();
+                    $orderProducts = OrderProducts::query()->where('order_id', '=', $order->id)->get();
                     foreach ($orderProducts as $orderProduct) {
-                        $stock =  Stock::query()->where('product_id','=',$orderProduct->product_id)->first();
+                        $stock =  Stock::query()->where('product_id', '=', $orderProduct->product_id)->first();
                         $stock->stock =  $stock->stock - $orderProduct->quantity;
                         $stock->save();
                     }
                 }
-                if($status == 'Paid'){
+                if ($status == 'Paid') {
                     $order->completeDate = date('Y-m-d');
                 }
-                if($status == 'Return'){
+                if ($status == 'Return') {
                     $order->completeDate = date('Y-m-d');
-                    $orderProducts = OrderProducts::query()->where('order_id','=',$order->id)->get();
+                    $orderProducts = OrderProducts::query()->where('order_id', '=', $order->id)->get();
                     foreach ($orderProducts as $orderProduct) {
-                        $stock =  Stock::query()->where('product_id','=',$orderProduct->product_id)->first();
+                        $stock =  Stock::query()->where('product_id', '=', $orderProduct->product_id)->first();
                         $stock->stock =  $stock->stock + $orderProduct->quantity;
                         $stock->save();
                     }
@@ -1046,13 +1040,13 @@ public function show(Request $request)
                 $order->save();
                 $notification = new Notification();
                 $notification->order_id = $id;
-                $notification->notificaton = Auth::user()->name.' Successfully Update #BB-'.$id.' Order status to '.$status;
+                $notification->notificaton = Auth::user()->name . ' Successfully Update #BB-' . $id . ' Order status to ' . $status;
                 $notification->user_id =  Auth::id();
                 $notification->save();
             }
             $response['status'] = 'success';
             $response['message'] = 'Successfully Assign User to this Order';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Assign User to this Order';
         }
@@ -1063,7 +1057,7 @@ public function show(Request $request)
     public function pendingInvoiced()
     {
         $status = 'all';
-        return view('manager.order.index',compact('status'));
+        return view('manager.order.index', compact('status'));
     }
 
     // Product Sync if Not exist
@@ -1071,14 +1065,14 @@ public function show(Request $request)
     {
         $stores = Store::query()->where('status', 'like', 'Active')->get();
         $orderCount = 0;
-        foreach ($stores as $store){
+        foreach ($stores as $store) {
             $syncProducts = json_decode($this->getProducts($store->storeUrl));
-            foreach ($syncProducts as $syncProduct){
+            foreach ($syncProducts as $syncProduct) {
                 $LocalProduct = Product::where('productCode', 'like', $syncProduct->sku)->get()->first();
-                if(!$LocalProduct && $syncProduct->price) {
+                if (!$LocalProduct && $syncProduct->price) {
                     $image = $syncProduct->image;
                     $imageName =  uniqid() . '.jpg';
-                    $img = public_path('product/') .$imageName;
+                    $img = public_path('product/') . $imageName;
                     file_put_contents($img, $this->curl_get_file_contents($image));
                     $newProduct = new Product();
                     $newProduct->productCode = $syncProduct->sku;
@@ -1089,12 +1083,11 @@ public function show(Request $request)
                     $orderCount++;
                 }
             }
-
         }
-        if($orderCount > 0){
+        if ($orderCount > 0) {
             $response['status'] = 'success';
             $response['products'] = $orderCount;
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['products'] = $orderCount;
         }
@@ -1122,7 +1115,7 @@ public function show(Request $request)
     public function getNotes(Request $request)
     {
         $order_id = $request['id'];
-        $notification = Notification::query()->where('order_id','=',$order_id)->latest()->get();
+        $notification = Notification::query()->where('order_id', '=', $order_id)->latest()->get();
         $notification['data'] = $notification->map(function ($notification) {
             $user = DB::table('users')->select('users.name')->where('id', '=', $notification->user_id)->get()->first();
             $notification->name = $user->name;
@@ -1130,7 +1123,6 @@ public function show(Request $request)
             return $notification;
         });
         return json_encode($notification);
-
     }
 
     // Update Note of Order
@@ -1144,10 +1136,10 @@ public function show(Request $request)
         $notification->user_id =  Auth::id();
         $request = $notification->save();
 
-        if($request) {
+        if ($request) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully to Update Order note';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Update Order note';
         }
@@ -1236,7 +1228,7 @@ public function show(Request $request)
     public function oldOrders(Request $request)
     {
         $order_id = $request['id'];
-        $customer = Customer::query()->where('order_id','=',$order_id)->get()->first();
+        $customer = Customer::query()->where('order_id', '=', $order_id)->get()->first();
         $orders  = DB::table('orders')
             ->select('orders.*', 'customers.customerName', 'customers.customerPhone', 'customers.customerAddress')
             ->leftJoin('customers', 'orders.id', '=', 'customers.order_id')
@@ -1244,22 +1236,22 @@ public function show(Request $request)
             ->where(function ($query) use ($customer) {
                 $query->where('customers.customerPhone', 'like', $customer->customerPhone);
             })->get();
-            // ->where([
-            //     ['customers.order_id', '!=', $order_id],
-            //     ['customers.customerPhone', 'like', $customer->customerPhone]
-            // ])->get();
+        // ->where([
+        //     ['customers.order_id', '!=', $order_id],
+        //     ['customers.customerPhone', 'like', $customer->customerPhone]
+        // ])->get();
         $order['data'] = $orders->map(function ($order) {
             $products = DB::table('order_products')->select('order_products.*')->where('order_id', '=', $order->id)->get();
             $orderProducts = '';
             foreach ($products as $product) {
-                $orderProducts = $orderProducts . $product->quantity.' x '. $product->productName . '<br>';
+                $orderProducts = $orderProducts . $product->quantity . ' x ' . $product->productName . '<br>';
             }
             $order->products = rtrim($orderProducts, '<br>');
             return $order;
         });
         return json_encode($order);
 
-//        return $orders;
+        //        return $orders;
     }
 
     // Get Status Wise order Count
@@ -1274,7 +1266,7 @@ public function show(Request $request)
         $response['pendingInvoiced'] = DB::table('orders')->where('status', 'like', 'Completed')->orWhere('orders.status', 'like', 'Pending Invoiced')->count();
         $response['invoiced'] = DB::table('orders')->where('status', 'like', 'Invoiced')->count();
         $response['stockOut'] = DB::table('orders')->where('status', 'like', 'Stock Out')->count();
-        $response['delivered'] = DB::table('orders')->whereIn('orders.status', ['Delivered', 'Customer Confirm','Customer On Hold','Request to Return'])->count();
+        $response['delivered'] = DB::table('orders')->whereIn('orders.status', ['Delivered', 'Customer Confirm', 'Customer On Hold', 'Request to Return'])->count();
         $response['customerOnHold'] = DB::table('orders')->whereIn('orders.status', ['Delivered', 'Customer On Hold'])->count();
         $response['customerConfirm'] = DB::table('orders')->where('status', 'like', 'Customer Confirm')->count();
         $response['requestToReturn'] = DB::table('orders')->where('status', 'like', 'Request to Return')->count();
@@ -1293,10 +1285,10 @@ public function show(Request $request)
         $invoice = new Invoice();
         $invoice->order_id = $ids;
         $result = $invoice->save();
-        if($result){
+        if ($result) {
             $response['status'] = 'success';
-            $response['link'] = url('manager/order/invoice/').'/'.$invoice->id;
-        }else{
+            $response['link'] = url('manager/order/invoice/') . '/' . $invoice->id;
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Order';
         }
@@ -1312,8 +1304,7 @@ public function show(Request $request)
     public function viewInvoice($id)
     {
         $invoice = Invoice::find($id);
-        return view('manager.order.print',compact('invoice'));
-
+        return view('manager.order.print', compact('invoice'));
     }
     public function curl_get_file_contents($URL)
     {
@@ -1326,7 +1317,7 @@ public function show(Request $request)
         if ($contents) return $contents;
         else return FALSE;
     }
-     public function settingValue($id)
+    public function settingValue($id)
     {
         $settings = Setting::find($id);
         return $settings->value;
@@ -1388,27 +1379,26 @@ public function show(Request $request)
     public function memoUpdate(Request $request)
     {
         $order = Order::find($request->id);
-        if($order->status != 'Paid' && $order->status != 'Return' &&  $order->status != 'Lost'){
+        if ($order->status != 'Paid' && $order->status != 'Return' &&  $order->status != 'Lost') {
             $order->memo = $request->memo;
             $result = $order->update();
-            if($result){
+            if ($result) {
                 $notification = new Notification();
                 $notification->order_id = $request->id;
-                $notification->notificaton = Auth::user()->name.' Update #BB-'.$request->id.' Order Memo To '.$request->memo;
+                $notification->notificaton = Auth::user()->name . ' Update #BB-' . $request->id . ' Order Memo To ' . $request->memo;
                 $notification->user_id =  Auth::id();
                 $notification->save();
                 $response['status'] = 'success';
                 $response['message'] = 'Successfully Updated Order Memo';
-            }else{
+            } else {
                 $response['status'] = 'failed';
                 $response['message'] = 'Unsuccessful to Updated Order Memo';
             }
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Updated Order Memo';
         }
         return json_encode($response);
         die();
     }
-
 }

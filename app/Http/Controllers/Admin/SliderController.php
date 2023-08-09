@@ -21,19 +21,19 @@ class SliderController extends Controller
     public function create()
     {
         return DataTables()->of(Slider::latest()->get())
-            ->addColumn('image', function(Slider $data) {
-                return '<img src="'.asset('/public/product/thumbnail/'.$data->image).'" alt="image" class="img-fluid avatar-xl rounded">';
+            ->addColumn('image', function (Slider $data) {
+                return '<img src="' . asset('/product/thumbnail/' . $data->image) . '" alt="image" class="img-fluid avatar-xl rounded">';
             })
-            ->addColumn('action', function(Slider $data) {
+            ->addColumn('action', function (Slider $data) {
 
-                return "<a href='javascript:void(0);' data-id='" .$data->id."' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>
-                    <a href='javascript:void(0);' data-id='" .$data->id. "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
+                return "<a href='javascript:void(0);' data-id='" . $data->id . "' class='action-icon btn-edit'> <i class='fas fa-1x fa-edit'></i></a>
+                    <a href='javascript:void(0);' data-id='" . $data->id . "' class='action-icon btn-delete'> <i class='fas fa-trash-alt'></i></a>";
             })
-            ->editColumn('status', function(Slider $data) {
-                if($data->status == 'Active'){
-                    return '<button type="button" class="btn btn-success btn-xs btn-status" data-status="Inactive" name="status" value="'. $data->id . '">Active</button>';
-                }else{
-                    return '<button type="button" class="btn btn-warning btn-xs btn-status" data-status="Active" name="status" value="'. $data->id . '" >Inactive</button>';
+            ->editColumn('status', function (Slider $data) {
+                if ($data->status == 'Active') {
+                    return '<button type="button" class="btn btn-success btn-xs btn-status" data-status="Inactive" name="status" value="' . $data->id . '">Active</button>';
+                } else {
+                    return '<button type="button" class="btn btn-warning btn-xs btn-status" data-status="Active" name="status" value="' . $data->id . '" >Inactive</button>';
                 }
             })
             ->escapeColumns([])->toJson();
@@ -55,7 +55,6 @@ class SliderController extends Controller
         if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Slider';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Slider';
@@ -103,7 +102,6 @@ class SliderController extends Controller
         if ($result) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Add Slider';
-
         } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Add Slider';
@@ -120,10 +118,10 @@ class SliderController extends Controller
     public function destroy($id)
     {
         $slider = Slider::find($id)->delete();
-        if($slider){
+        if ($slider) {
             $response['status'] = 'success';
             $response['message'] = 'Successfully Delete City';
-        }else{
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete City';
         }
@@ -134,24 +132,24 @@ class SliderController extends Controller
         $slider = Slider::find($request->id);
         $slider->status = $request->status;
         $result = $slider->save();
-        if($result){
+        if ($result) {
             $response['status'] = 'success';
-            $response['message'] = 'Successfully Update Status to '.$request['status'];
-        }else{
+            $response['message'] = 'Successfully Update Status to ' . $request['status'];
+        } else {
             $response['status'] = 'failed';
-            $response['message'] = 'Unsuccessful to update Status '.$request['status'];
+            $response['message'] = 'Unsuccessful to update Status ' . $request['status'];
         }
         return response()->json($response, 201);
     }
     public function delete(Request $request)
     {
-        if($request->ids){
+        if ($request->ids) {
             foreach ($request->ids as $id) {
                 Slider::find($id)->delete();
                 $response['status'] = 'success';
                 $response['message'] = 'Successfully Delete Slide';
             }
-        }else {
+        } else {
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Delete Slide';
         }
