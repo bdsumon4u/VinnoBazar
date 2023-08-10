@@ -182,6 +182,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'namespace' => 'Admin', 'mi
     })->name('admin');
 
     Route::resource('user', 'UserController');
+    Route::match(['get', 'post'], 'user/logins/{user}', 'UserController@logins');
     
     
 

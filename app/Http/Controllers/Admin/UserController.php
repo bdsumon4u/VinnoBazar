@@ -6,7 +6,9 @@ use App\Role;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -159,9 +161,41 @@ class UserController extends Controller
     public function users()
     {
         $users['data'] = DB::table('users')
-            ->select('users.*', 'roles.name as roleName')
-            ->join('roles', 'users.role_id', '=', 'roles.id')->get();
+            ->select('users.*', 'roles.name as roleName', 'sessions.user_agent', 'sessions.last_activity as last_activity', DB::raw('(SELECT COUNT(*) FROM sessions WHERE sessions.user_id = users.id) as session_count'))
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->leftJoin('sessions', function ($join) {
+                $join->on('sessions.user_id', '=', 'users.id')
+                    ->whereRaw('sessions.id = (SELECT id FROM sessions WHERE user_id = users.id ORDER BY last_activity DESC LIMIT 1)');
+            })
+            ->get()->map(function ($item) {
+                $item->last_activity = date('d-M-Y h:i A', $item->last_activity);
+                $item->last_login = cache()->get('last_login_'.$item->id);
+                return $item;
+            });
         return json_encode($users);
+    }
+
+    public function logins(Request $request, User $user) {
+        if ($request->isMethod('POST')) {
+            if (Hash::check($request->get('password'), $user->password)) {
+                $authUser = Auth::user();
+                Auth::setUser($user)->logoutOtherDevices($request->get('password'));
+
+                if ($authUser->id != $user->id) {
+                    DB::table('sessions')->where('user_id', $user->id)->delete();
+                }
+
+                Auth::setUser($authUser);
+            } else {
+                return redirect()->back()->withErrors(['password' => 'Password is incorrect']);
+            }
+        }
+        return view('admin.user.logins', [
+            'user' => $user,
+            'logins' => DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->get(),
+        ]);
     }
 
     public function role(Request $request)

@@ -26,6 +26,8 @@
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Email</th>
+                                <th>Last Login</th>
+                                <th>Last Activity</th>
                                 <th>Type</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -100,10 +102,24 @@
                     }, 
                     {data: "phone"},
                     {data: "email"},
+                    {
+                        "data": null,
+                        render: function (data) {
+                            if (data.session_count == 0) return 'N/A';
+                            return '<a href="{{url("admin/user/logins/")}}/'+data.id+'">'+data.last_login+'</a> ['+data.session_count+']';
+                        }
+                    },
+                    {
+                        "data": null,
+                        render: function (data) {
+                            return data.last_activity;
+                        }
+                    },
                     {data: "roleName"},
                     {
                         "data": null,
                         render: function (data) {
+                            console.log(data)
                             if($('#user_id').val() == data.id ){
                                 return data.status;
                             }else{
