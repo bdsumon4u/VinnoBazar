@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\LogHistory;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -50,6 +51,11 @@ class LoginController extends Controller
     }
     public function logout()
     {
+        LogHistory::create([
+            'user_id' => Auth::user()->id,
+            'action' => 'Logout',
+            'session_id' => session()->getId()
+        ]);
         Auth::logout();
         return redirect()->to('/login');
     }
@@ -125,6 +131,11 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        LogHistory::create([
+            'user_id' => $user->id,
+            'action' => 'Login',
+            'session_id' => $request->session()->getId()
+        ]);
         Cache::forever('last_login_'.$user->id, now()->format('d-M-Y h:i A'));
     }
 }

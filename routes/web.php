@@ -14,7 +14,9 @@ use App\User;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/test', function () {
+    dd(cache('last_login_80'));
+});
 Route::get('/', 'WebsiteController@index')->name('home');
 Route::get('/product/{id}', 'WebsiteController@product')->name('product');
 Route::get('/category/{slug}', 'WebsiteController@category')->name('category');

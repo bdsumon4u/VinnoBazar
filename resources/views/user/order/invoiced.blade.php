@@ -343,8 +343,11 @@
                                             }
                                         }
                                         
-                                        // table.ajax.reload();
-                                        location.reload();
+                                        table.ajax.reload();
+                                        // location.reload();
+                                    },
+                                    complete: function () {
+                                        $(document).find('.dt-checkboxes-select-all').click();
                                     }
                                 });
                             });
@@ -404,6 +407,9 @@
                                         Swal.fire("Something wrong ! Please try again.");
                                     }
                                 }
+                            },
+                            complete: function () {
+                                $(document).find('.dt-checkboxes-select-all').click();
                             }
                         });
                     }
@@ -442,6 +448,9 @@
                                 Swal.fire("Something wrong ! Please try again.");
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
 
@@ -515,6 +524,9 @@
                                 toastr.error('Something wrong ! Please try again.');
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
             });
@@ -1129,6 +1141,9 @@
                                                         toastr.error('Something wrong ! Please try again.');
                                                     }
                                                 }
+                                            },
+                                            complete: function () {
+                                                $(document).find('.dt-checkboxes-select-all').click();
                                             }
                                         });
                                     } else {

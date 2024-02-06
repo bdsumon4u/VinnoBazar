@@ -11,6 +11,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
@@ -20,12 +21,16 @@ class CartController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
         session_start();
         error_reporting(0);
         if (!$_SESSION['delivery']) {
             $_SESSION['delivery'] = 60;
+        }
+
+        if (cache()->has('placeOrder')) {
+            return view('website.checkout');
         }
 
         return view('website.checkout');
@@ -277,8 +282,18 @@ class CartController extends Controller
         $_SESSION['delivery'] = $request->selectCourier;
     }
 
-    public function placeOrder(Request $request)
+    public function placeOrder(Request $request, $destroy = true)
     {
+        $order_limit = 20;
+        $limit = $order_limit;
+
+        if (! $limit) {
+            $response['status'] = 'failed';
+            $response['message'] = "You can't order more than $order_limit times in a day.";
+            return response()->json($response, 201);
+            abort(403, $response['message']);
+        }
+
         $customerPhone = $request->customerPhone;
         if (!preg_match('/^01\d{9}$/', $customerPhone)) {
             $response['status'] = 'failed';
@@ -369,7 +384,10 @@ class CartController extends Controller
             $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Placed Order';
         }
-        Cart::destroy();
+        if ($destroy) {
+            Cart::destroy();
+        }
+
         return response()->json($response, 201);
     }
 

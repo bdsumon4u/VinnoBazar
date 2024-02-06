@@ -398,6 +398,9 @@
                                         Swal.fire("Something wrong ! Please try again.");
                                     }
                                 }
+                            },
+                            complete: function () {
+                                $(document).find('.dt-checkboxes-select-all').click();
                             }
                         });
                     }
@@ -436,6 +439,9 @@
                                 Swal.fire("Something wrong ! Please try again.");
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
 
@@ -508,6 +514,9 @@
                                 toastr.error('Something wrong ! Please try again.');
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
             });

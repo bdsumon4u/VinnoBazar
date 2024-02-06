@@ -1,12 +1,40 @@
 @extends('layouts.app')
 @section('content')
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <h4 class="page-title mt-0 d-inline">{{ $user->name }} :=: Log in/out History </h4>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-centered table-borderless table-hover mb-0" id="stockTable" width="100%">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>Action</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($histories as $history)
+                                    <tr class="{{$history->action == 'Login' ? 'text-success' : ($history->action == 'Logout' ? 'text-danger' : '')}}">
+                                        <td>{{ $history->action }}</td>
+                                        <td>{{ $history->created_at->format('d-M-Y h:i A') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        {{ $histories->links() }}
+                    </div>
+                </div> <!-- end card-body-->
+            </div> <!-- end card-->
+        </div> <!-- end col -->
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
                     <div class="row mb-2">
                         <div class="col-md-6">
-                            <h4 class="page-title mt-0 d-inline">{{ $user->name }} :=: <span>{{$logins->count()}}</span> Devices </h4>
+                            <h4 class="page-title mt-0 d-inline">{{ $user->name }} :=: <span>{{$logins->count()}}</span> Active Devices </h4>
                         </div>
                         <div class="col-md-6">
                             <form method="POST" class="text-md-right">
@@ -23,7 +51,7 @@
                         <table class="table table-centered table-borderless table-hover mb-0" id="stockTable" width="100%">
                             <thead class="thead-light">
                             <tr>
-                                <th>IP Address</th>
+                                <!--<th>IP Address</th>-->
                                 <th>User Agent</th>
                                 <th>Last Activity</th>
                             </tr>
@@ -31,7 +59,7 @@
                             <tbody>
                                 @foreach ($logins as $session)
                                     <tr>
-                                        <td>{{ $session->ip_address }}</td>
+                                        <!--<td>{{ $session->ip_address }}</td>-->
                                         <td>{{ $session->user_agent }}</td>
                                         <td>{{ date('d-M-Y h:i A', $session->last_activity) }}</td>
                                     </tr>

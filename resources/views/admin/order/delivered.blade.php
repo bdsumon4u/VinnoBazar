@@ -533,6 +533,9 @@ $(".datepicker").flatpickr();
                                         Swal.fire("Something wrong ! Please try again.");
                                     }
                                 }
+                            },
+                            complete: function () {
+                                $(document).find('.dt-checkboxes-select-all').click();
                             }
                         });
                     }
@@ -571,6 +574,9 @@ $(".datepicker").flatpickr();
                                 Swal.fire("Something wrong ! Please try again.");
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
 
@@ -643,6 +649,9 @@ $(".datepicker").flatpickr();
                                 toastr.error('Something wrong ! Please try again.');
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
             });

@@ -171,11 +171,11 @@
                                         @endforeach
                                     </div>
                                 </div>
-                                <button type="button"
+                                {{-- <button type="button"
                                         class="btn btn-danger btn-all-delete btn-xs waves-effect waves-light ml-2 float-right">
                                     <i
                                         class="fas fa-trash mr-1"></i> Delete All
-                                </button>
+                                </button> --}}
                                 <a href="{{url('manager/order/create')}}"
                                    class="btn btn-primary btn-add btn-xs waves-effect waves-light float-right"><i
                                         class="fas fa-plus mr-1"></i> Add New Order
@@ -503,6 +503,9 @@
                                         Swal.fire("Something wrong ! Please try again.");
                                     }
                                 }
+                            },
+                            complete: function () {
+                                $(document).find('.dt-checkboxes-select-all').click();
                             }
                         });
                     }
@@ -541,6 +544,9 @@
                                 Swal.fire("Something wrong ! Please try again.");
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
 
@@ -613,6 +619,9 @@
                                 toastr.error('Something wrong ! Please try again.');
                             }
                         }
+                    },
+                    complete: function () {
+                        $(document).find('.dt-checkboxes-select-all').click();
                     }
                 });
             });

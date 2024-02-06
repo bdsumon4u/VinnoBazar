@@ -28,7 +28,7 @@ Route::post('status-update', function (Request $request)
         return;
     }
 
-    if (! $order = Order::where('invoiceID', $request->merchant_order_id)->orWhere('courier->consignment_id', $request->consignment_id)->first()) return;
+    if (! $order = Order::where('invoiceID', $request->merchant_order_id)/*->orWhere('courier->consignment_id', $request->consignment_id)*/->first()) return;
 
     $courier = $request->only([
         'consignment_id',

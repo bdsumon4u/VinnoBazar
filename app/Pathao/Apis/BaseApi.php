@@ -76,24 +76,34 @@ class BaseApi
      */
     private function authenticate()
     {
+        info('authenticate');
         try {
             $jsonToken = json_decode(Storage::get('pathao_courier_token.json'), true);
-            $response = $this->send("POST", "aladdin/api/v1/issue-token", array_merge($jsonToken, [
+            info('json token', $jsonToken);
+            $data = array_merge($jsonToken, [
                 "username"   => "hasancse4@gmail.com", # config("pathao.username"),
                 "password"   => config("pathao.password"),
                 "grant_type" => "password",
-            ]));
+            ]);
+            info('auth data', $data);
+            $response = $this->send("POST", "aladdin/api/v1/issue-token", $data);
+            info('response');
 
             $accessToken = [
                 "token"      => "Bearer " . $response->access_token,
                 "expires_in" => time() + $response->expires_in
             ];
+            
+            info('access token', $accessToken);
 
             Storage::disk('local')->put('pathao_bearer_token.json', json_encode($accessToken));
 
         } catch (ClientException $e) {
             $response = json_decode($e->getResponse()->getBody()->getContents());
+            info($response->message);
             throw new PathaoException($response->message, $response->code);
+        } catch (\Exception $e) {
+            info('exception: ' . $e->getMessage());
         }
     }
 
@@ -106,6 +116,7 @@ class BaseApi
     public function authorization()
     {
         $storageExits = Storage::disk('local')->exists('pathao_bearer_token.json');
+        info($storageExits ? 'bearer exists' : 'bearer not exist');
 
         if (!$storageExits) {
             $this->authenticate();
@@ -113,8 +124,10 @@ class BaseApi
 
         $jsonToken = Storage::get('pathao_bearer_token.json');
         $jsonToken = json_decode($jsonToken);
+        info('json token', (array)$jsonToken);
 
         if ($jsonToken->expires_in < time()) {
+            info('expired');
             $this->authenticate();
             $jsonToken = Storage::get('pathao_bearer_token.json');
             $jsonToken = json_decode($jsonToken);

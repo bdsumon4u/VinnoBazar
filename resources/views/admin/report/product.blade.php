@@ -87,6 +87,7 @@
                         startDate: function() { return $('#startDate').val() },
                         endDate: function() { return $('#endDate').val() },
                         courierID: function() { return $('#courierID').val() },
+                        userID: function() { return $('#userID').val() },
                         orderStatus: function() { return $('#orderStatus').val() }
                     }
                 },

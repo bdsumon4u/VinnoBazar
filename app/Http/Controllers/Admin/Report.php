@@ -353,33 +353,35 @@ class Report extends Controller
 
         $orders = DB::table('orders')
             ->join('order_products', 'orders.id', '=', 'order_products.order_id')
-            ->select('orders.status','orders.orderDate','order_products.*', DB::raw('SUM(quantity) as total_amount'))
+            ->select('orders.status','orders.orderDate', 'orders.deliveryDate', 'orders.completeDate','order_products.*', DB::raw('SUM(quantity) as total_amount'))
             ->groupBy('order_products.product_id');
 
             if($request['startDate'] != '' && $request['endDate'] != ''){
                 if($request['orderStatus'] == 'Delivered'){
                     $orders = $orders->whereBetween('orders.deliveryDate', [$request['startDate'].' 00:00:00',$request['endDate'].' 23:59:59']);
-                 }else if($request['orderStatus'] == 'Paid'){
-                    $orders = $orders->whereBetween('orders.completeDate', [$request['startDate'].' 00:00:00',$request['endDate'].' 23:59:59']);
-                 }else if($request['orderStatus'] == 'Return'){
+                }else if($request['orderStatus'] == 'Paid' || $request['orderStatus'] == 'Return'){
                     $orders = $orders->whereBetween('orders.completeDate', [$request['startDate'].' 00:00:00',$request['endDate'].' 23:59:59']);
                 }else{
-                    if($request['orderStatus'] =! 'Pending Invoiced' && $request['orderStatus'] =! 'Invoiced'){
+                    // if($request['orderStatus'] =! 'Pending Invoiced' && $request['orderStatus'] =! 'Invoiced'){
                         $orders = $orders->whereBetween('orders.orderDate', [$request['startDate'].' 00:00:00',$request['endDate'].' 23:59:59']);
-                    }
+                    // }
                 }
             }
 
-            if($status != 'All' && $status != 'Pending Invoiced'){
+            if($status != 'All' /* && $status != 'Pending Invoiced' */){
                 $orders  = $orders->where('orders.status', 'like', $status);
             }
-            if($status == 'Pending Invoiced'){
-                $orders = $orders ->whereIn('orders.status', ['Completed', 'Pending Invoiced']);
-                // $orders  = $orders->where('orders.status', 'like', $status);
-            }
+            // if($status == 'Pending Invoiced'){
+            //     $orders = $orders ->whereIn('orders.status', ['Completed', 'Pending Invoiced']);
+            //     // $orders  = $orders->where('orders.status', 'like', $status);
+            // }
             
             if($request['courierID'] != ''){
                 $orders = $orders->where('orders.courier_id','=',$request['courierID']);
+            }
+
+            if($request['userID'] != ''){
+                $orders = $orders->where('orders.user_id','=',$request['userID']);
             }
 
             return DataTables::of($orders)->make();

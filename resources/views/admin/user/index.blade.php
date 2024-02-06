@@ -26,7 +26,7 @@
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Email</th>
-                                <th>Last Login</th>
+                                <th>Log in/out</th>
                                 <th>Last Activity</th>
                                 <th>Type</th>
                                 <th>Status</th>
@@ -105,8 +105,7 @@
                     {
                         "data": null,
                         render: function (data) {
-                            if (data.session_count == 0) return 'N/A';
-                            return '<a href="{{url("admin/user/logins/")}}/'+data.id+'">'+data.last_login+'</a> ['+data.session_count+']';
+                            return '<a class="'+(data.last_login[0] == '+' ? 'text-success' : (data.last_login[0] == '-' ? 'text-danger' : ''))+'" href="{{url("admin/user/logins/")}}/'+data.id+'">'+data.last_login+'</a> ['+data.session_count+']';
                         }
                     },
                     {

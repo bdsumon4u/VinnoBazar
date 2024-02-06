@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Role;
 use App\Http\Controllers\Controller;
+use App\LogHistory;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -169,7 +170,11 @@ class UserController extends Controller
             })
             ->get()->map(function ($item) {
                 $item->last_activity = date('d-M-Y h:i A', $item->last_activity);
-                $item->last_login = cache()->get('last_login_'.$item->id);
+                $history = LogHistory::query()->where('user_id', $item->id)->orderBy('id', 'desc')->first();
+                $item->last_login = 'Never';
+                if ($history) {
+                    $item->last_login = ($history->action == 'Login' ? '+' : '-').' '.$history->created_at->format('d-M-Y h:i A');
+                }
                 return $item;
             });
         return json_encode($users);
@@ -195,6 +200,7 @@ class UserController extends Controller
             'logins' => DB::table('sessions')
                 ->where('user_id', $user->id)
                 ->get(),
+            'histories' => LogHistory::query()->where('user_id', $user->id)->orderBy('id', 'desc')->paginate(10),
         ]);
     }
 
