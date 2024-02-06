@@ -13,6 +13,7 @@ use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Spatie\GoogleTagManager\GoogleTagManagerFacade;
 
 class CartController extends Controller
 {
@@ -29,8 +30,30 @@ class CartController extends Controller
             $_SESSION['delivery'] = 60;
         }
 
-        if (cache()->has('placeOrder')) {
-            return view('website.checkout');
+        $ecommerce = [
+            'currency' => 'BDT',
+            'value' => Cart::subtotal('0', '', ''),
+            'items' => Cart::content()->map(function ($item) {
+                $product = $item->model->load('categories');
+                return [
+                    'item_id' => $product->id,
+                    'item_name' => $product->productName,
+                    'item_category' => $product->categories->random()->categoryName,
+                    'price' => $item->price,
+                    'quantity' => $item->qty,
+                ];
+            })->values(),
+        ];
+        if (mt_rand(0, 1)) {
+            GoogleTagManagerFacade::set([
+                'event' => 'add_to_cart',
+                'ecommerce' => $ecommerce,
+            ]);
+        } else {
+            GoogleTagManagerFacade::set([
+                'event' => 'begin_checkout',
+                'ecommerce' => $ecommerce,
+            ]);
         }
 
         return view('website.checkout');
@@ -287,7 +310,7 @@ class CartController extends Controller
         $order_limit = 20;
         $limit = $order_limit;
 
-        if (! $limit) {
+        if (!$limit) {
             $response['status'] = 'failed';
             $response['message'] = "You can't order more than $order_limit times in a day.";
             return response()->json($response, 201);
@@ -364,11 +387,12 @@ class CartController extends Controller
                 $orderProducts->quantity = $item->qty;
                 $orderProducts->productPrice = $item->model->price();
                 $orderProducts->save();
-
-                $response['link'] = url('/checkout/order-received/' . $order->id);
-                $response['status'] = 'success';
-                $response['message'] = 'Successfully Placed Order';
             }
+
+            $response['link'] = url('/checkout/order-received/' . $order->id);
+            $response['status'] = 'success';
+            $response['message'] = 'Successfully Placed Order';
+
             $notification = new Notification();
             $notification->order_id = $order->id;
             $notification->notificaton = '#SD' . $order->id . ' Order Has Been Created by ' . $user->name;
@@ -380,10 +404,9 @@ class CartController extends Controller
             Notification::where('order_id', '=', $order->id)->delete();
             Order::where('id', '=', $order->id)->delete();
             $response['status'] = 'failed';
-            $response['message'] = 'Unsuccessful to Add Order';
-            $response['status'] = 'failed';
             $response['message'] = 'Unsuccessful to Placed Order';
         }
+
         if ($destroy) {
             Cart::destroy();
         }
@@ -391,8 +414,26 @@ class CartController extends Controller
         return response()->json($response, 201);
     }
 
-    public function orderRecived()
+    public function orderRecived($id)
     {
+        $order = Order::findOrFail($id);
+        GoogleTagManagerFacade::set([
+            'event' => 'purchase',
+            'ecommerce' => [
+                'currency' => 'BDT',
+                'transaction_id' => $order->invoiceID,
+                'value' => $order->subTotal,
+                'items' => OrderProducts::where('order_id', $order->id)->get()->map(function ($item) {
+                    return [
+                        'item_id' => $item->product_id,
+                        'item_name' => $item->productName,
+                        'item_category' => Product::findOrFail($item->product_id)->categories->random()->categoryName,
+                        'price' => $item->productPrice,
+                        'quantity' => $item->quantity,
+                    ];
+                }),
+            ],
+        ]);
         return view('website.thankyou');
     }
     public function uniqueID()

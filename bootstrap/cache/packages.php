@@ -96,6 +96,17 @@
       0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
+  'spatie/laravel-googletagmanager' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Spatie\\GoogleTagManager\\GoogleTagManagerServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'GoogleTagManager' => 'Spatie\\GoogleTagManager\\GoogleTagManagerFacade',
+    ),
+  ),
   'yajra/laravel-datatables-oracle' => 
   array (
     'providers' => 

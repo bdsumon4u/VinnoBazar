@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    @include('googletagmanager::head')
     <meta charset="utf-8">
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="cache-control" content="max-age=604800" />
@@ -26,6 +27,7 @@
 </head>
 
 <body>
+    @include('googletagmanager::body')
     <div class="mobile-side-menu d-lg-none hide">
         <div class="side-menu-overlay " onclick="sideMenuClose()"></div>
         <div class="side-menu-wrap">
@@ -178,8 +180,7 @@
                     {!! Settings::get('footer_copyright_text') !!}
                 </div>
                 <div class="col-md-2 text-md-right text-muted">
-                    <img src="/assets/images/ssl.png" width="512px" height="25px"
-                        align="right">
+                    <img src="/assets/images/ssl.png" width="512px" height="25px" align="right">
                 </div>
             </section>
         </div>

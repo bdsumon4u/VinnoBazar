@@ -7,11 +7,16 @@ use App\Product;
 use App\Slider;
 use App\Page;
 use Illuminate\Http\Request;
+use Spatie\GoogleTagManager\GoogleTagManagerFacade;
 
 class WebsiteController extends Controller
 {
     public function index()
     {
+        GoogleTagManagerFacade::set([
+            'event' => 'page_view',
+            'page_type' => 'home',
+        ]);
         $slug = 'offer';
         $topProducts = Product::with('media', 'categories')->whereHas('categories', function ($query) use ($slug) {
             $query->where('categories.categorySlug', 'like', $slug);
@@ -25,6 +30,22 @@ class WebsiteController extends Controller
     public function product($id)
     {
         $product = Product::with('media', 'categories')->where('products.id', 'like', $id)->firstOrFail();
+        GoogleTagManagerFacade::set([
+            'event' => 'view_item',
+            'ecommerce' => [
+                'currency' => 'BDT',
+                'value' => $product->productSalePrice,
+                'items' => [
+                    [
+                        'item_id' => $product->id,
+                        'item_name' => $product->productName,
+                        'price' => $product->productSalePrice,
+                        'item_category' => $product->categories->first()->categoryName,
+                        'quantity' => 1,
+                    ],
+                ],
+            ],
+        ]);
         $relatedProducts = Product::with('media', 'categories')->where('products.id', '!=', $product->id)->limit(30)->get();
         return view('website.product', compact('product', 'relatedProducts'));
     }
@@ -35,14 +56,38 @@ class WebsiteController extends Controller
             $query->where('categories.categorySlug', 'like', $slug);
         })->paginate(30);
         $category = Category::where('categories.categorySlug', $slug)->first();
+        GoogleTagManagerFacade::set([
+            'event' => 'view_item_list',
+            'ecommerce' => [
+                'item_list_id' => $category->id,
+                'item_list_name' => $category->categoryName,
+                'items' => $categoryProducts->map(function ($product) {
+                    return [
+                        'item_id' => $product->id,
+                        'item_name' => $product->productName,
+                        'price' => $product->productSalePrice,
+                        'item_category' => $product->categories->first()->categoryName,
+                        'quantity' => 1,
+                    ];
+                })->toArray(),
+            ],
+        ]);
         return view('website.category', compact('category', 'categoryProducts'));
     }
 
     public function shop()
     {
         if (isset($_REQUEST['q'])) {
+            GoogleTagManagerFacade::set([
+                'event' => 'search',
+                'search_term' => $_REQUEST['q'],
+            ]);
             $shop = Product::with('media', 'categories')->where('products.productName', 'like', "%{$_REQUEST['q']}%")->paginate(30);
         } else {
+            GoogleTagManagerFacade::set([
+                'event' => 'page_view',
+                'page_type' => 'shop',
+            ]);
             $shop = Product::with('media', 'categories')->paginate(30);
         }
         return view('website.shop', compact('shop'));
@@ -51,6 +96,11 @@ class WebsiteController extends Controller
     public function page($slug)
     {
         $page = Page::where('pageSlug', 'like', $slug)->first();
+        GoogleTagManagerFacade::set([
+            'event' => 'page_view',
+            'page_type' => 'page',
+            'content' => $page->toArray(),
+        ]);
         $relatedProducts = Product::with('media', 'categories')->inRandomOrder()->limit(30)->get();
         return view('website.page', compact('page', 'relatedProducts'));
     }

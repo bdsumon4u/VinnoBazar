@@ -31,7 +31,7 @@ Route::get('/miniCart','CartController@miniCart')->name('miniCart');
 Route::get('/updateQuantity','CartController@updateQuantity')->name('updateQuantity');
 Route::get('/updateDeliveryCharge','CartController@updateDeliveryCharge')->name('updateDeliveryCharge');
 Route::post('/placeOrder','CartController@placeOrder')->name('placeOrder');
-Route::get('/checkout/order-received/{id}','CartController@orderRecived')->name('placeOrder');
+Route::get('/checkout/order-received/{id}','CartController@orderRecived')->name('orderReceived');
 
 //Route::get('/', function () {
 //    return redirect('login');
