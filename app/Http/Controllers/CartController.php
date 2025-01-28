@@ -423,11 +423,27 @@ class CartController extends Controller
                 'currency' => 'BDT',
                 'transaction_id' => $order->invoiceID,
                 'value' => $order->subTotal,
-                'items' => OrderProducts::where('order_id', $order->id)->get()->map(function ($item) {
+                'shipping' => $order->deliveryCharge,
+                'tax' => 0.0,
+                'coupon' => '',
+                'items' => OrderProducts::where('order_id', $order->id)->get()->map(function ($item, $i) {
                     return [
+                        'affiliation' => request()->getHost(),
+                        'item_brand' => request()->getHost(),
+                        'coupon' => '',
+                        'discount' => 0,
+                        'index' => $i,
                         'item_id' => $item->product_id,
                         'item_name' => $item->productName,
                         'item_category' => Product::findOrFail($item->product_id)->categories->random()->categoryName,
+                        'item_category2' => '',
+                        'item_category3' => '',
+                        'item_category4' => '',
+                        'item_category5' => '',
+                        'item_list_id' => 'related_products',
+                        'item_list_name' => 'Related Products',
+                        'item_variant' => '',
+                        'location_id' => request()->getHost(),
                         'price' => $item->productPrice,
                         'quantity' => $item->quantity,
                     ];
